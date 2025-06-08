@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable default-case */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client"
@@ -19,6 +21,7 @@ import {
   EditorContent,
   FloatingMenu,
   useEditor,
+  UseEditorOptions,
 } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import {
@@ -420,7 +423,7 @@ export const useTiptapEditor = () => {
   return ctx
 }
 
-export interface TiptapEditorProps extends PropsWithChildren {
+export interface TiptapEditorProps extends PropsWithChildren, UseEditorOptions {
   content: string
   floatingMenu?: React.ReactNode
   bubbleMenu?: React.ReactNode
@@ -479,7 +482,8 @@ export const TiptapLabel = ({
     if (labelPattern === ":icon :label") {
       return (
         <Fragment key={block.key}>
-          {block?.icon ? <block.icon /> : null} {block?.label}
+          {block?.icon ? <block.icon className="size-4" /> : null}{" "}
+          {block?.label}
         </Fragment>
       )
     }
@@ -487,7 +491,7 @@ export const TiptapLabel = ({
     if (labelPattern === ":icon") {
       return (
         <Fragment key={block.key}>
-          {block?.icon ? <block.icon /> : null}
+          {block?.icon ? <block.icon className="size-4" /> : null}
         </Fragment>
       )
     }
@@ -495,7 +499,8 @@ export const TiptapLabel = ({
     if (labelPattern === ":label :icon") {
       return (
         <Fragment key={block.key}>
-          {block?.label} {block?.icon ? <block.icon /> : null}
+          {block?.label}{" "}
+          {block?.icon ? <block.icon className="size-4" /> : null}
         </Fragment>
       )
     }
@@ -565,7 +570,7 @@ export const TiptapButton = ({
   if (!editor) return null
 
   return (
-    <Fragment>
+    <>
       <Button
         variant={isActive ? "secondary" : "ghost"}
         size="icon"
@@ -578,7 +583,7 @@ export const TiptapButton = ({
         {cloneElement(children as ReactElement, { action } as any)}
       </Button>
       {block?.widget ? <block.widget /> : null}
-    </Fragment>
+    </>
   )
 }
 
@@ -672,14 +677,12 @@ export const TiptapDropdown = ({
 
 export interface TiptapToolbarProps extends ComponentProps<"div"> {}
 
-export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => {
-  return (
-    <div
-      {...props}
-      className={cn("flex flex-row items-center gap-2", className)}
-    />
-  )
-}
+export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
+  <div
+    {...props}
+    className={cn("flex flex-row items-center gap-2", className)}
+  />
+)
 
 export interface TiptapContentProps
   extends Omit<ComponentProps<typeof EditorContent>, "editor"> {}
@@ -815,9 +818,6 @@ export function onTiptapEventChangeBlock(
     case tiptapActions.blockquote:
       editor.chain().focus().setBlockquote().run()
       break
-    case tiptapActions.divider:
-      editor.chain().focus().setHorizontalRule().run()
-      break
     case tiptapActions.bulletList:
       editor.chain().focus().toggleBulletList().run()
       break
@@ -885,8 +885,6 @@ export function canUseAction(editor: Editor, action: TiptapAction) {
       return editor.can().chain().focus().toggleCode().run()
     case tiptapActions.blockquote:
       return editor.can().chain().focus().setBlockquote().run()
-    case tiptapActions.divider:
-      return editor.can().chain().focus().setHorizontalRule().run()
     case tiptapActions.bulletList:
       return editor.can().chain().focus().toggleBulletList().run()
     case tiptapActions.orderedList:
