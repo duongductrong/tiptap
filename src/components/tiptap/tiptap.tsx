@@ -576,6 +576,7 @@ export const TiptapButton = ({
       <Button
         variant={isActive ? "secondary" : "ghost"}
         size="icon"
+        type="button"
         {...props}
         className={cn("size-8 w-auto min-w-8 px-2", className)}
         onClick={handleOnClick}
