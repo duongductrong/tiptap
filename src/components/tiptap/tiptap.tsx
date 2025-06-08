@@ -434,10 +434,12 @@ export const TiptapEditor = ({
   floatingMenu,
   bubbleMenu,
   children,
+  ...editorProps
 }: TiptapEditorProps) => {
   const editor = useEditor({
     content,
     extensions,
+    ...editorProps,
   })
 
   const sharedValues = useMemo<TipTapContextType>(
