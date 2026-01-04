@@ -8,11 +8,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { DropdownMenuContent as DropdownMenuContentPrimitive } from "@radix-ui/react-dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -55,7 +68,9 @@ import {
   ArrowUpToLine,
   Bold,
   CheckSquare,
+  Check,
   ChevronDown,
+  ClipboardCopy,
   Code,
   Code2,
   Columns3,
@@ -108,6 +123,48 @@ import tippy, { Instance as TippyInstance } from "tippy.js"
 // =============================================================================
 
 const lowlight = createLowlight(all)
+
+// =============================================================================
+// CodeBlock Language Configuration
+// =============================================================================
+
+interface CodeBlockLanguage {
+  name: string
+  value: string
+}
+
+const CODEBLOCK_LANGUAGES: CodeBlockLanguage[] = [
+  { name: "Plain Text", value: "plaintext" },
+  { name: "JavaScript", value: "javascript" },
+  { name: "TypeScript", value: "typescript" },
+  { name: "JSX", value: "jsx" },
+  { name: "TSX", value: "tsx" },
+  { name: "HTML", value: "html" },
+  { name: "CSS", value: "css" },
+  { name: "SCSS", value: "scss" },
+  { name: "JSON", value: "json" },
+  { name: "Markdown", value: "markdown" },
+  { name: "Python", value: "python" },
+  { name: "Java", value: "java" },
+  { name: "C", value: "c" },
+  { name: "C++", value: "cpp" },
+  { name: "C#", value: "csharp" },
+  { name: "Go", value: "go" },
+  { name: "Rust", value: "rust" },
+  { name: "Ruby", value: "ruby" },
+  { name: "PHP", value: "php" },
+  { name: "Swift", value: "swift" },
+  { name: "Kotlin", value: "kotlin" },
+  { name: "Scala", value: "scala" },
+  { name: "SQL", value: "sql" },
+  { name: "GraphQL", value: "graphql" },
+  { name: "Shell", value: "bash" },
+  { name: "PowerShell", value: "powershell" },
+  { name: "Docker", value: "dockerfile" },
+  { name: "YAML", value: "yaml" },
+  { name: "XML", value: "xml" },
+  { name: "Diff", value: "diff" },
+]
 
 const CodeBlock = Extension.create({
   name: "codeBlockLowlight",
@@ -1996,10 +2053,158 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
   )
 }
 
+// =============================================================================
+// CodeBlock Bubble Menu (Notion-style language switcher)
+// =============================================================================
+
+export interface CodeBlockBubbleMenuProps extends Omit<
+  ComponentProps<typeof BubbleMenu>,
+  "editor" | "children"
+> {
+  children?: React.ReactNode
+}
+
+export const CodeBlockBubbleMenu = (props: CodeBlockBubbleMenuProps) => {
+  const { editor } = useContext(TipTapContext)
+  const [open, setOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  if (!editor) return null
+
+  const currentLanguage =
+    editor.getAttributes("codeBlock").language || "plaintext"
+
+  const currentLanguageLabel =
+    CODEBLOCK_LANGUAGES.find((lang) => lang.value === currentLanguage)?.name ||
+    currentLanguage
+
+  const handleSelectLanguage = (value: string) => {
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("codeBlock", { language: value })
+      .run()
+    setOpen(false)
+  }
+
+  const handleCopyCode = async () => {
+    const { state } = editor
+    const { from } = state.selection
+    const node = state.doc.nodeAt(from)
+
+    if (node && node.type.name === "codeBlock") {
+      const code = node.textContent
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  return (
+    <BubbleMenu
+      {...props}
+      editor={editor}
+      tippyOptions={{
+        duration: 100,
+        placement: "top-end",
+        offset: [0, 8],
+        getReferenceClientRect: () => {
+          const { view, state } = editor
+          const { from } = state.selection
+
+          // Find the code block node and get its position
+          let codeBlockPos = from
+          state.doc.nodesBetween(from, from, (node, pos) => {
+            if (node.type.name === "codeBlock") {
+              codeBlockPos = pos
+              return false
+            }
+          })
+
+          const domNode = view.nodeDOM(codeBlockPos)
+          if (domNode instanceof HTMLElement) {
+            const preElement = domNode.querySelector("pre") || domNode
+            if (preElement instanceof HTMLElement) {
+              return preElement.getBoundingClientRect()
+            }
+          }
+          return view.dom.getBoundingClientRect()
+        },
+      }}
+      shouldShow={({ editor }) => editor.isActive("codeBlock")}
+      className="w-fit"
+    >
+      <div className="flex items-center gap-0.5 rounded-md border bg-popover p-0.5 shadow-md">
+        {/* Language Selector */}
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 px-2 text-xs font-normal"
+              role="combobox"
+              aria-expanded={open}
+            >
+              <Code2 className="size-3.5" />
+              {currentLanguageLabel}
+              <ChevronDown className="size-3 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-[200px] p-0"
+            align="start"
+            sideOffset={8}
+          >
+            <Command>
+              <CommandInput placeholder="Search language..." className="h-9" />
+              <CommandList>
+                <CommandEmpty>No language found.</CommandEmpty>
+                <CommandGroup>
+                  {CODEBLOCK_LANGUAGES.map((lang) => (
+                    <CommandItem
+                      key={lang.value}
+                      value={lang.name}
+                      onSelect={() => handleSelectLanguage(lang.value)}
+                    >
+                      {lang.name}
+                      {currentLanguage === lang.value && (
+                        <Check className="ml-auto size-4" />
+                      )}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        {/* Divider */}
+        <div className="h-4 w-px bg-border" />
+
+        {/* Copy Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={handleCopyCode}
+          title={copied ? "Copied!" : "Copy code"}
+        >
+          {copied ? (
+            <Check className="size-3.5 text-green-500" />
+          ) : (
+            <ClipboardCopy className="size-3.5" />
+          )}
+        </Button>
+      </div>
+    </BubbleMenu>
+  )
+}
+
 export const TiptapBubbleMenu = () => {
   return (
     <>
       <TableBubbleMenu />
+      <CodeBlockBubbleMenu />
     </>
   )
 }

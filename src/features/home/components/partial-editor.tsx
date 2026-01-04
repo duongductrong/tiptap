@@ -14,6 +14,83 @@ import {
 import { motion } from "motion/react"
 import PartialEditorAddExtension from "./partial-editor-add-extension"
 
+const DEMO_CONTENT = `
+<h1>Welcome to the Tiptap Editor</h1>
+<p>This is a <strong>full-featured</strong> rich text editor built with <em>Tiptap</em> and <u>shadcn/ui</u>. Try the <code>/</code> slash command to insert blocks!</p>
+
+<h2>Text Formatting</h2>
+<p>The editor supports various text styles:</p>
+<ul>
+  <li><strong>Bold text</strong> for emphasis</li>
+  <li><em>Italic text</em> for subtle emphasis</li>
+  <li><u>Underlined text</u> for highlights</li>
+  <li><s>Strikethrough</s> for corrections</li>
+  <li><code>Inline code</code> for technical terms</li>
+</ul>
+
+<h2>Lists & Structure</h2>
+<p>Organize your content with lists:</p>
+<ol>
+  <li>First ordered item</li>
+  <li>Second ordered item</li>
+  <li>Third ordered item</li>
+</ol>
+
+<h3>Blockquotes</h3>
+<blockquote>
+  <p>"The best way to predict the future is to invent it." — Alan Kay</p>
+</blockquote>
+
+<hr />
+
+<h2>Code Blocks</h2>
+<p>Syntax highlighting is built-in:</p>
+<pre><code class="language-typescript">interface EditorProps {
+  content: string;
+  onChange?: (html: string) => void;
+}
+
+function Editor({ content, onChange }: EditorProps) {
+  return <TiptapEditor content={content} />;
+}</code></pre>
+
+<h2>Tables</h2>
+<p>Create and edit tables with ease:</p>
+<table>
+  <tbody>
+    <tr>
+      <th>Feature</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>Rich Text</td>
+      <td>✅ Complete</td>
+      <td>Bold, italic, underline, strike</td>
+    </tr>
+    <tr>
+      <td>Code Blocks</td>
+      <td>✅ Complete</td>
+      <td>Syntax highlighting included</td>
+    </tr>
+    <tr>
+      <td>Tables</td>
+      <td>✅ Complete</td>
+      <td>Resizable columns</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Text Alignment</h2>
+<p style="text-align: left">Left aligned text (default)</p>
+<p style="text-align: center">Center aligned text</p>
+<p style="text-align: right">Right aligned text</p>
+
+<hr />
+
+<p>Start editing to explore all features! 🚀</p>
+`
+
 export interface PartialEditorProps {}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -39,32 +116,7 @@ const PartialEditor = (props: PartialEditorProps) => {
         </Tabs>
       </div>
 
-      <TiptapEditor
-        // floatingMenu={<TipTapFloatingMenu> </TipTapFloatingMenu>}
-        // bubbleMenu={
-        //   <TipTapBubbleMenu>This is the bubble menu</TipTapBubbleMenu>
-        // }
-        content={`<h2>Welcome to Tiptap!</h2>
-        <p>This is a <em>basic</em> example of <strong>Tiptap</strong>. It offers a variety of text styles you’d expect from a text editor. Let's explore some features:</p>
-        <ul>
-          <li><p>Here’s a bullet list with one item…</p></li>
-          <li><p>…and here’s another item.</p></li>
-        </ul>
-        <p>Isn’t that great? All of this is editable. But wait, there’s more. Check out this code block:</p>
-        <pre><code class="language-css">body {
-  display: none;
-}</code></pre>
-        <p>Impressive, right? This is just the beginning. Try clicking around and explore more features. Don’t forget to check the other examples too.</p>
-        <blockquote><p>Wow, that’s amazing. Keep up the great work! 👏 <br>— Your Mentor</p></blockquote>
-        <h3>Advanced Features</h3>
-        <p>Beyond basic text editing, Tiptap supports advanced features like:</p>
-        <ol>
-          <li><p>Nested lists for better organization.</p></li>
-          <li><p>Tables to structure data efficiently.</p></li>
-          <li><p>Embeds for integrating multimedia content.</p></li>
-        </ol>
-        <p>With Tiptap, the possibilities are endless. Dive deeper and discover what you can create!</p>`}
-      >
+      <TiptapEditor content={DEMO_CONTENT}>
         <TiptapToolbar className="sticky top-0 p-4 justify-center mb-8 bg-background z-10">
           <TiptapButton action="undo">
             <TiptapLabel label=":icon" />
