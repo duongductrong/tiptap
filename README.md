@@ -18,6 +18,10 @@
 
 ---
 
+> [!CAUTION]
+> ### ⚠️ Under Development
+> This project is currently in its early stages of development. **Expect breaking changes, bugs, and incomplete documentation.** It is not yet recommended for production use.
+
 ## Features
 
 - 🎨 **Theme-aware** — Automatically adapts to light/dark mode with shadcn/ui theming
