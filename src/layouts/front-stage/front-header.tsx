@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowUpRight, Diameter, Loader2 } from "lucide-react"
+import { Github, Loader2 } from "lucide-react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 
@@ -18,34 +18,35 @@ const SwitchThemeButton = dynamic(
   }
 )
 
-export interface FrontHeaderProps {}
+export interface FrontHeaderProps { }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FrontHeader = (props: FrontHeaderProps) => {
   return (
-    <header className="flex items-center justify-between h-16 container mx-auto">
-      <div className="flex items-center gap-2 text-primary">
-        <Diameter className="size-4 cursor-pointer" />
-        <span className="text-sm font-bold">Tiptap extensions</span>
-      </div>
-
-      <div className="flex items-center gap-8">
-        <Link
-          href="https://twitter.com/duongductrong_"
-          target="_blank"
-          className="text-sm font-normal flex items-center gap-1"
-        >
-          Twitter <ArrowUpRight className="size-3 text-muted-foreground" />
-        </Link>
-        <Link
-          href="https://github.com/duongductrong"
-          target="_blank"
-          className="text-sm font-normal flex items-center gap-1"
-        >
-          Github <ArrowUpRight className="size-3 text-muted-foreground" />
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="max-w-6xl mx-auto flex h-14 items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <div className="size-6 rounded-md bg-foreground flex items-center justify-center">
+            <span className="text-background text-xs font-bold">T</span>
+          </div>
+          <span className="hidden sm:inline-block">tiptap</span>
         </Link>
 
-        <SwitchThemeButton />
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link
+              href="https://github.com/duongductrong/tiptap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gap-2"
+            >
+              <Github className="size-4" />
+              <span className="hidden sm:inline-block">GitHub</span>
+            </Link>
+          </Button>
+
+          <SwitchThemeButton />
+        </div>
       </div>
     </header>
   )

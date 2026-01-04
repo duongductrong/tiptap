@@ -1,16 +1,18 @@
 "use client"
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { motion, Variants } from "motion/react"
+import { ArrowRight, Copy, Check } from "lucide-react"
+import { useState } from "react"
 
-export interface PartialIntroductionProps {}
+export interface PartialIntroductionProps { }
 
 const variants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.3,
+      staggerChildren: 0.15,
     },
   },
 }
@@ -21,15 +23,25 @@ const itemVariants: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.5,
     },
   },
 }
 
-const PartialIntroduction = (props: PartialIntroductionProps) => {
+const INSTALL_COMMAND = "npx shadcn@latest add https://tiptap-seven.vercel.app/schema/tiptap.json"
+
+const PartialIntroduction = () => {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(INSTALL_COMMAND)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <motion.div
-      className="flex flex-col py-12 md:py-8 items-center text-center"
+      className="flex flex-col py-16 md:py-24 items-center text-center"
       variants={variants}
       initial="hidden"
       whileInView="visible"
@@ -37,28 +49,54 @@ const PartialIntroduction = (props: PartialIntroductionProps) => {
         once: true,
       }}
     >
-      <Badge variant="secondary" className="mb-4 px-3 py-1 text-sm font-medium">
-        Shadcn/ui + tiptap
-      </Badge>
+      {/* Main Headline */}
+      <motion.h1
+        variants={itemVariants}
+        className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground"
+      >
+        Beautiful editors, made simple.
+      </motion.h1>
 
-      <motion.div variants={itemVariants} className="space-y-3">
-        <h2 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-          Extend Your Editor&apos;s
-        </h2>
-        <h2 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-purple-500 to-primary bg-clip-text text-transparent">
-          Capabilities
-        </h2>
+      {/* Description */}
+      <motion.p
+        variants={itemVariants}
+        className="mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed"
+      >
+        Beautiful, ready to use, and customizable editor components built on
+        Tiptap. Styled with shadcn/ui. Zero config. One command setup.
+      </motion.p>
+
+      {/* Install Command */}
+      <motion.div
+        variants={itemVariants}
+        className="mt-8 flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-4 py-2.5 font-mono text-sm"
+      >
+        <span className="text-muted-foreground">$</span>
+        <code className="text-foreground">{INSTALL_COMMAND}</code>
+        <button
+          onClick={handleCopy}
+          className={cn(
+            "ml-2 p-1.5 rounded-md transition-colors",
+            "hover:bg-accent text-muted-foreground hover:text-foreground"
+          )}
+          aria-label="Copy command"
+        >
+          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+        </button>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="mt-6 space-y-2 max-w-2xl">
-        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-          Customize workflows, enhance formatting, and maintain
-          <span className="font-medium text-foreground">
-            {" "}
-            full control
-          </span>{" "}
-          over your content
-        </p>
+      {/* CTA Buttons */}
+      <motion.div
+        variants={itemVariants}
+        className="mt-8 flex flex-wrap items-center justify-center gap-4"
+      >
+        <Button size="lg" className="gap-2">
+          Get Started
+          <ArrowRight className="size-4" />
+        </Button>
+        <Button variant="ghost" size="lg">
+          View Examples
+        </Button>
       </motion.div>
     </motion.div>
   )
