@@ -437,7 +437,13 @@ export const SlashMenuList = React.forwardRef<
   }
 
   return (
-    <ScrollArea className="max-h-[300px] overflow-auto rounded-md border bg-popover p-1 shadow-md">
+    <ScrollArea
+      style={{
+        height:
+          items.length * Number(itemRefs.current[0]?.offsetHeight ?? 48) + 8,
+      }}
+      className="max-h-[300px] overflow-auto rounded-md border bg-popover p-1 shadow-md"
+    >
       {items.map((item, index) => (
         <button
           key={item.title}
@@ -447,6 +453,7 @@ export const SlashMenuList = React.forwardRef<
           onClick={() => selectItem(index)}
           className={cn(
             "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
+            "min-w-[256px]",
             index === selectedIndex
               ? "bg-accent text-accent-foreground"
               : "hover:bg-accent hover:text-accent-foreground"
@@ -658,7 +665,7 @@ const extensions = [
   TiptapTableHeader.configure({
     HTMLAttributes: {
       class:
-        "h-10 px-2 text-left align-middle font-medium text-muted-foreground border-b bg-muted/50 [&>p]:m-0",
+        "h-10 px-2 text-left align-middle font-medium text-muted-foreground border-b border-r last:border-r-none bg-muted/10 [&>p]:m-0",
     },
   }),
   TiptapTableCell.configure({
