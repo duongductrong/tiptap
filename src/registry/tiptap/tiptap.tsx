@@ -1456,10 +1456,6 @@ export const TiptapLabel = ({
     return tiptapBlocks.map(getLabelNode)
   }, [action, tiptapBlocks])
 
-  if (tiptapBlocks.length) {
-    // console.log("tiptapBlocksMap.get(action!)!", tiptapBlocks)
-  }
-
   return (
     <span
       {...props}
@@ -1586,7 +1582,12 @@ export const TiptapDropdown = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="pb-2">
-          <ScrollArea className="max-h-[300px] overflow-auto">
+          <ScrollArea
+            style={{
+              height: filteredBlocks.length * (48 + 8),
+            }}
+            className="max-h-[300px] overflow-auto"
+          >
             {filteredBlocks.map((item) => (
               <DropdownMenuItem
                 key={item.label}
