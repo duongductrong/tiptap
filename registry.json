@@ -29,19 +29,7 @@
             "files": [
                 {
                     "path": "src/registry/tiptap/tiptap.tsx",
-                    "type": "registry:block"
-                },
-                {
-                    "path": "src/registry/tiptap/extensions/code-block.tsx",
-                    "type": "registry:block"
-                },
-                {
-                    "path": "src/registry/tiptap/extensions/image.tsx",
-                    "type": "registry:block"
-                },
-                {
-                    "path": "src/registry/tiptap/widgets/image.tsx",
-                    "type": "registry:block"
+                    "type": "registry:ui"
                 }
             ]
         }
