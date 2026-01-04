@@ -8,12 +8,12 @@ import {
   TiptapEditor,
   TiptapLabel,
   TiptapToolbar,
-} from "@/components/tiptap/tiptap"
+} from "@/registry/tiptap/tiptap"
 import { motion } from "motion/react"
 import PartialEditorAddExtension from "./partial-editor-add-extension"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export interface PartialEditorProps {}
+export interface PartialEditorProps { }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PartialEditor = (props: PartialEditorProps) => {

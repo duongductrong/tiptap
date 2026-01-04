@@ -2,7 +2,7 @@ import { Fragment } from "react"
 import PartialEditor from "../components/partial-editor"
 import PartialIntroduction from "../components/partial-introduction"
 
-export interface HomeProps {}
+export interface HomeProps { }
 
 const Home = () => {
   return (
