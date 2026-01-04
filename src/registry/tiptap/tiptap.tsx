@@ -1,7 +1,3 @@
-/* eslint-disable consistent-return */
-/* eslint-disable default-case */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -1548,8 +1544,9 @@ export const TipTapDropdownContext = createContext<TipTapDropdownContextType>({
   sharedBlocks: [],
 } as TipTapDropdownContextType)
 
-export interface TiptapDropdownProps
-  extends ComponentProps<typeof DropdownMenu> {
+export interface TiptapDropdownProps extends ComponentProps<
+  typeof DropdownMenu
+> {
   actions: TiptapAction[]
 }
 
@@ -1625,8 +1622,10 @@ export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
   />
 )
 
-export interface TiptapContentProps
-  extends Omit<ComponentProps<typeof EditorContent>, "editor"> {}
+export interface TiptapContentProps extends Omit<
+  ComponentProps<typeof EditorContent>,
+  "editor"
+> {}
 
 export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
   const { editor } = useContext(TipTapContext)
@@ -1641,8 +1640,10 @@ export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
     />
   )
 }
-export interface TipTapFloatingMenuProps
-  extends Omit<ComponentProps<typeof FloatingMenu>, "editor"> {}
+export interface TipTapFloatingMenuProps extends Omit<
+  ComponentProps<typeof FloatingMenu>,
+  "editor"
+> {}
 
 export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
   const { editor } = useContext(TipTapContext)
@@ -1674,8 +1675,10 @@ export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
   )
 }
 
-export interface TipTapBubbleMenuProps
-  extends Omit<ComponentProps<typeof BubbleMenu>, "editor" | "children"> {}
+export interface TipTapBubbleMenuProps extends Omit<
+  ComponentProps<typeof BubbleMenu>,
+  "editor" | "children"
+> {}
 
 export const TipTapBubbleMenu = (props: TipTapBubbleMenuProps) => {
   const { editor } = useContext(TipTapContext)
@@ -1689,8 +1692,10 @@ export const TipTapBubbleMenu = (props: TipTapBubbleMenuProps) => {
   )
 }
 
-export interface TableBubbleMenuProps
-  extends Omit<ComponentProps<typeof BubbleMenu>, "editor" | "children"> {
+export interface TableBubbleMenuProps extends Omit<
+  ComponentProps<typeof BubbleMenu>,
+  "editor" | "children"
+> {
   children?: React.ReactNode
 }
 
@@ -2010,8 +2015,8 @@ export function useTiptapEditorIsActive(key: TiptapAction) {
   return !editor
     ? false
     : tiptapTextAlignActiveActions.includes(key)
-    ? editor?.isActive({ textAlign: key })
-    : editor?.isActive(key)
+      ? editor?.isActive({ textAlign: key })
+      : editor?.isActive(key)
 }
 
 export function onTiptapEventChangeBlock(

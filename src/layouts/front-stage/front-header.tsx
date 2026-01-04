@@ -1,9 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Link } from "@/i18n/routing"
 import { ArrowUpRight, Diameter, Loader2 } from "lucide-react"
 import dynamic from "next/dynamic"
+import Link from "next/link"
 
 const SwitchThemeButton = dynamic(
   () =>
