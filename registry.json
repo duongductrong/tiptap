@@ -16,6 +16,7 @@
                 "@tiptap/extension-typography",
                 "@tiptap/extension-underline",
                 "@tiptap/extension-code-block-lowlight",
+                "@tiptap/extension-table",
                 "@tiptap/suggestion",
                 "lowlight",
                 "lucide-react",

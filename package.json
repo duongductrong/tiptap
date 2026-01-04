@@ -46,6 +46,7 @@
     "@tanstack/react-query-next-experimental": "^5.66.3",
     "@tiptap/core": "^2.11.5",
     "@tiptap/extension-code-block-lowlight": "^2.11.5",
+    "@tiptap/extension-table": "^3.14.0",
     "@tiptap/extension-text-align": "^2.11.5",
     "@tiptap/extension-typography": "^2.11.5",
     "@tiptap/extension-underline": "^2.11.5",

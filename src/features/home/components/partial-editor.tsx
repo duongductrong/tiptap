@@ -1,6 +1,8 @@
 "use client"
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  TiptapBubbleMenu,
   TiptapButton,
   TiptapContent,
   TiptapDivider,
@@ -11,9 +13,8 @@ import {
 } from "@/registry/tiptap/tiptap"
 import { motion } from "motion/react"
 import PartialEditorAddExtension from "./partial-editor-add-extension"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export interface PartialEditorProps { }
+export interface PartialEditorProps {}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PartialEditor = (props: PartialEditorProps) => {
@@ -124,6 +125,8 @@ const PartialEditor = (props: PartialEditorProps) => {
           <PartialEditorAddExtension />
         </TiptapToolbar>
         <TiptapContent className="prose dark:prose-invert max-w-full" />
+
+        <TiptapBubbleMenu />
       </TiptapEditor>
     </motion.div>
   )
