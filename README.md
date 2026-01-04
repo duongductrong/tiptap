@@ -38,7 +38,7 @@
 ## Installation
 
 ```bash
-npx shadcn@latest add https://your-domain.com/r/tiptap.json
+npx shadcn@latest add https://tiptap-seven.vercel.app/schema/tiptap.json
 ```
 
 ## Quick Start
