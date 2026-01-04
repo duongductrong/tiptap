@@ -16,8 +16,10 @@
                 "@tiptap/extension-typography",
                 "@tiptap/extension-underline",
                 "@tiptap/extension-code-block-lowlight",
+                "@tiptap/suggestion",
                 "lowlight",
-                "lucide-react"
+                "lucide-react",
+                "tippy.js"
             ],
             "registryDependencies": [
                 "button",

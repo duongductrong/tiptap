@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { Extension, mergeAttributes, Node } from "@tiptap/core"
+import { Extension, mergeAttributes, Node, Range } from "@tiptap/core"
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
 import { TextAlign } from "@tiptap/extension-text-align"
 import TiptapTypography from "@tiptap/extension-typography"
@@ -30,10 +30,13 @@ import {
     Editor,
     EditorContent,
     FloatingMenu,
+    ReactRenderer,
     useEditor,
     UseEditorOptions,
 } from "@tiptap/react"
+import Suggestion, { SuggestionOptions, SuggestionProps } from "@tiptap/suggestion"
 import StarterKit from "@tiptap/starter-kit"
+import tippy, { Instance as TippyInstance } from "tippy.js"
 import { all, createLowlight } from "lowlight"
 import {
     AlignCenter,
@@ -61,6 +64,9 @@ import {
     Type,
     Underline,
     Undo,
+    MessageSquare,
+    Table,
+    CheckSquare,
 } from "lucide-react"
 import React, {
     Children,
@@ -205,6 +211,336 @@ export const Image = Node.create<ImageOptions>({
 })
 
 // =============================================================================
+// Slash Menu Extension
+// =============================================================================
+
+export interface SlashMenuItem {
+    title: string
+    description: string
+    icon: React.ElementType
+    searchTerms: string[]
+    command: (editor: Editor) => void
+}
+
+const slashMenuItems: SlashMenuItem[] = [
+    // Basic Blocks
+    {
+        title: "Text",
+        description: "Start writing with plain text",
+        icon: Type,
+        searchTerms: ["paragraph", "text", "plain"],
+        command: (editor) => editor.chain().focus().setParagraph().run(),
+    },
+    {
+        title: "Heading 1",
+        description: "Large section heading",
+        icon: Heading1,
+        searchTerms: ["heading", "h1", "title", "large"],
+        command: (editor) => editor.chain().focus().setHeading({ level: 1 }).run(),
+    },
+    {
+        title: "Heading 2",
+        description: "Medium section heading",
+        icon: Heading2,
+        searchTerms: ["heading", "h2", "subtitle", "medium"],
+        command: (editor) => editor.chain().focus().setHeading({ level: 2 }).run(),
+    },
+    {
+        title: "Heading 3",
+        description: "Small section heading",
+        icon: Heading3,
+        searchTerms: ["heading", "h3", "small"],
+        command: (editor) => editor.chain().focus().setHeading({ level: 3 }).run(),
+    },
+    {
+        title: "Bullet List",
+        description: "Create a simple bullet list",
+        icon: List,
+        searchTerms: ["bullet", "list", "unordered", "ul"],
+        command: (editor) => editor.chain().focus().toggleBulletList().run(),
+    },
+    {
+        title: "Ordered List",
+        description: "Create a numbered list",
+        icon: ListOrdered,
+        searchTerms: ["ordered", "list", "numbered", "ol"],
+        command: (editor) => editor.chain().focus().toggleOrderedList().run(),
+    },
+    // Advanced Blocks
+    {
+        title: "Quote",
+        description: "Capture a quote",
+        icon: TextQuote,
+        searchTerms: ["quote", "blockquote", "citation"],
+        command: (editor) => editor.chain().focus().setBlockquote().run(),
+    },
+    {
+        title: "Code Block",
+        description: "Display code with syntax highlighting",
+        icon: Code2,
+        searchTerms: ["code", "codeblock", "programming"],
+        command: (editor) => editor.chain().focus().toggleCodeBlock().run(),
+    },
+    {
+        title: "Horizontal Rule",
+        description: "Insert a visual divider",
+        icon: Minus,
+        searchTerms: ["divider", "hr", "horizontal", "rule", "line"],
+        command: (editor) => editor.chain().focus().setHorizontalRule().run(),
+    },
+    {
+        title: "Image",
+        description: "Insert an image from the library",
+        icon: ImageUp,
+        searchTerms: ["image", "picture", "photo", "media"],
+        command: () => document.dispatchEvent(ImageEvent),
+    },
+    {
+        title: "Callout",
+        description: "Highlight important information",
+        icon: MessageSquare,
+        searchTerms: ["callout", "note", "info", "warning", "alert"],
+        command: (editor) =>
+            editor
+                .chain()
+                .focus()
+                .insertContent({
+                    type: "blockquote",
+                    content: [
+                        {
+                            type: "paragraph",
+                            content: [{ type: "text", text: "💡 " }],
+                        },
+                    ],
+                })
+                .run(),
+    },
+    {
+        title: "Table",
+        description: "Insert a table",
+        icon: Table,
+        searchTerms: ["table", "grid", "spreadsheet"],
+        command: (editor) => {
+            // Table extension not included - placeholder
+            editor
+                .chain()
+                .focus()
+                .insertContent("⚠️ Table extension not installed")
+                .run()
+        },
+    },
+    {
+        title: "Todo List",
+        description: "Task list with checkboxes",
+        icon: CheckSquare,
+        searchTerms: ["todo", "task", "checkbox", "checklist"],
+        command: (editor) => {
+            // TaskList extension not included - placeholder
+            editor
+                .chain()
+                .focus()
+                .insertContent("⚠️ TaskList extension not installed")
+                .run()
+        },
+    },
+]
+
+function filterSlashMenuItems(query: string): SlashMenuItem[] {
+    if (!query) return slashMenuItems
+    const lowerQuery = query.toLowerCase()
+    return slashMenuItems.filter(
+        (item) =>
+            item.title.toLowerCase().includes(lowerQuery) ||
+            item.searchTerms.some((term) => term.includes(lowerQuery))
+    )
+}
+
+export interface SlashMenuListProps {
+    items: SlashMenuItem[]
+    command: (item: SlashMenuItem) => void
+    editor: Editor
+}
+
+export interface SlashMenuListRef {
+    onKeyDown: (props: { event: KeyboardEvent }) => boolean
+}
+
+export const SlashMenuList = React.forwardRef<SlashMenuListRef, SlashMenuListProps>(
+    ({ items, command }, ref) => {
+        const [selectedIndex, setSelectedIndex] = useState(0)
+        const itemRefs = React.useRef<(HTMLButtonElement | null)[]>([])
+
+        const selectItem = (index: number) => {
+            const item = items[index]
+            if (item) command(item)
+        }
+
+        const handleKeyDown = (props: { event: KeyboardEvent }): boolean => {
+            const { event } = props
+            if (event.key === "ArrowUp") {
+                setSelectedIndex((prev) => (prev - 1 + items.length) % items.length)
+                return true
+            }
+            if (event.key === "ArrowDown") {
+                setSelectedIndex((prev) => (prev + 1) % items.length)
+                return true
+            }
+            if (event.key === "Enter") {
+                selectItem(selectedIndex)
+                return true
+            }
+            return false
+        }
+
+        React.useImperativeHandle(ref, () => ({
+            onKeyDown: handleKeyDown,
+        }))
+
+        useEffect(() => {
+            setSelectedIndex(0)
+        }, [items])
+
+        useEffect(() => {
+            const selectedItem = itemRefs.current[selectedIndex]
+            if (selectedItem) {
+                selectedItem.scrollIntoView({ block: "nearest", behavior: "smooth" })
+            }
+        }, [selectedIndex])
+
+        if (items.length === 0) {
+            return (
+                <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
+                    No results found
+                </div>
+            )
+        }
+
+        return (
+            <ScrollArea className="max-h-[300px] overflow-auto rounded-md border bg-popover p-1 shadow-md">
+                {items.map((item, index) => (
+                    <button
+                        key={item.title}
+                        ref={(el) => { itemRefs.current[index] = el }}
+                        onClick={() => selectItem(index)}
+                        className={cn(
+                            "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
+                            index === selectedIndex
+                                ? "bg-accent text-accent-foreground"
+                                : "hover:bg-accent hover:text-accent-foreground"
+                        )}
+                    >
+                        <div
+                            className="flex size-8 items-center justify-center rounded-lg border border-border bg-background"
+                            aria-hidden="true"
+                        >
+                            <item.icon size={16} strokeWidth={2} className="opacity-60" />
+                        </div>
+                        <div className="flex flex-col items-start">
+                            <span className="text-sm font-medium">{item.title}</span>
+                            <span className="text-xs text-muted-foreground">
+                                {item.description}
+                            </span>
+                        </div>
+                    </button>
+                ))}
+            </ScrollArea>
+        )
+    }
+)
+SlashMenuList.displayName = "SlashMenuList"
+
+interface SlashMenuSuggestionOptions {
+    editor: Editor
+}
+
+function createSlashMenuSuggestion(): Omit<SuggestionOptions<SlashMenuItem>, "editor"> {
+    return {
+        char: "/",
+        items: ({ query }) => filterSlashMenuItems(query),
+        render: () => {
+            let component: ReactRenderer<SlashMenuListRef> | null = null
+            let popup: TippyInstance[] | null = null
+
+            return {
+                onStart: (props: SuggestionProps<SlashMenuItem>) => {
+                    component = new ReactRenderer(SlashMenuList, {
+                        props: {
+                            ...props,
+                            command: (item: SlashMenuItem) => {
+                                props.command(item)
+                            },
+                        },
+                        editor: props.editor,
+                    })
+
+                    if (!props.clientRect) return
+
+                    popup = tippy("body", {
+                        getReferenceClientRect: props.clientRect as () => DOMRect,
+                        appendTo: () => document.body,
+                        content: component.element,
+                        showOnCreate: true,
+                        interactive: true,
+                        trigger: "manual",
+                        placement: "bottom-start",
+                    })
+                },
+                onUpdate: (props: SuggestionProps<SlashMenuItem>) => {
+                    component?.updateProps({
+                        ...props,
+                        command: (item: SlashMenuItem) => {
+                            props.command(item)
+                        },
+                    })
+
+                    if (!props.clientRect || !popup?.[0]) return
+
+                    popup[0].setProps({
+                        getReferenceClientRect: props.clientRect as () => DOMRect,
+                    })
+                },
+                onKeyDown: (props: { event: KeyboardEvent }): boolean => {
+                    if (props.event.key === "Escape") {
+                        popup?.[0]?.hide()
+                        return true
+                    }
+                    return component?.ref?.onKeyDown(props) ?? false
+                },
+                onExit: () => {
+                    popup?.[0]?.destroy()
+                    component?.destroy()
+                },
+            }
+        },
+        command: ({ editor, range, props }) => {
+            // Delete the "/" trigger and any query text
+            editor.chain().focus().deleteRange(range).run()
+            // Execute the selected command
+            props.command(editor)
+        },
+    }
+}
+
+export const SlashMenuExtension = Extension.create({
+    name: "slashMenu",
+
+    addOptions() {
+        return {
+            suggestion: createSlashMenuSuggestion(),
+        }
+    },
+
+    addProseMirrorPlugins() {
+        return [
+            Suggestion({
+                editor: this.editor,
+                ...this.options.suggestion,
+            }),
+        ]
+    },
+})
+
+// =============================================================================
 // ImageWidget (inlined from widgets/image.tsx)
 // =============================================================================
 
@@ -271,6 +607,12 @@ const extensions = [
         allowNetwork: true,
         allowSameDomain: true,
     }),
+
+    /**
+     * @description Slash Menu for inserting blocks via "/" trigger
+     * @reference Notion-style slash commands
+     */
+    SlashMenuExtension.configure({}),
 ]
 
 const tiptapActions = {
