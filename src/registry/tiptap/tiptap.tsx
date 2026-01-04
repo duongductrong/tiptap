@@ -277,12 +277,12 @@ export const Image = Node.create<ImageOptions>({
     return {
       setImage:
         (options) =>
-        ({ commands }) => {
-          return commands.insertContent({
-            type: this.name,
-            attrs: options,
-          })
-        },
+          ({ commands }) => {
+            return commands.insertContent({
+              type: this.name,
+              attrs: options,
+            })
+          },
     }
   },
 })
@@ -793,7 +793,148 @@ const extensions = [
   }),
 ]
 
-const tableStyles = `
+const editorStyles = `
+  /* ==========================================================================
+     Code Block Styles
+     ========================================================================== */
+  .ProseMirror pre {
+    background: hsl(220 13% 18%);
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: hsl(210 14% 83%);
+  }
+  .ProseMirror pre code {
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+    font-family: inherit;
+  }
+  .ProseMirror code {
+    background: hsl(var(--muted));
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.375rem;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    font-size: 0.875em;
+  }
+
+  /* ==========================================================================
+     Syntax Highlighting Theme (GitHub Dark-inspired)
+     ========================================================================== */
+  /* Comments */
+  .ProseMirror .hljs-comment,
+  .ProseMirror .hljs-quote {
+    color: hsl(215 12% 50%);
+    font-style: italic;
+  }
+
+  /* Keywords & Tags */
+  .ProseMirror .hljs-keyword,
+  .ProseMirror .hljs-selector-tag,
+  .ProseMirror .hljs-addition {
+    color: hsl(350 89% 72%);
+  }
+
+  /* Strings & Regex */
+  .ProseMirror .hljs-string,
+  .ProseMirror .hljs-regexp,
+  .ProseMirror .hljs-attribute,
+  .ProseMirror .hljs-template-variable,
+  .ProseMirror .hljs-variable.language_ {
+    color: hsl(212 97% 81%);
+  }
+
+  /* Numbers */
+  .ProseMirror .hljs-number,
+  .ProseMirror .hljs-literal {
+    color: hsl(212 97% 81%);
+  }
+
+  /* Functions & Classes */
+  .ProseMirror .hljs-title,
+  .ProseMirror .hljs-title.class_,
+  .ProseMirror .hljs-title.function_ {
+    color: hsl(260 83% 79%);
+  }
+
+  /* Built-in & Types */
+  .ProseMirror .hljs-built_in,
+  .ProseMirror .hljs-type {
+    color: hsl(29 67% 75%);
+  }
+
+  /* Variables & Params */
+  .ProseMirror .hljs-variable,
+  .ProseMirror .hljs-params {
+    color: hsl(210 14% 93%);
+  }
+
+  /* Properties & Attributes */
+  .ProseMirror .hljs-attr,
+  .ProseMirror .hljs-property {
+    color: hsl(212 97% 81%);
+  }
+
+  /* Symbols & Bullets */
+  .ProseMirror .hljs-symbol,
+  .ProseMirror .hljs-bullet {
+    color: hsl(350 89% 72%);
+  }
+
+  /* Meta & Preprocessor */
+  .ProseMirror .hljs-meta,
+  .ProseMirror .hljs-meta .hljs-keyword {
+    color: hsl(350 89% 72%);
+  }
+
+  /* Links */
+  .ProseMirror .hljs-link {
+    color: hsl(212 97% 81%);
+    text-decoration: underline;
+  }
+
+  /* Deletion (diff) */
+  .ProseMirror .hljs-deletion {
+    color: hsl(350 89% 72%);
+    background: hsl(350 89% 72% / 0.15);
+  }
+
+  /* Addition (diff) */
+  .ProseMirror .hljs-addition {
+    color: hsl(139 66% 69%);
+    background: hsl(139 66% 69% / 0.15);
+  }
+
+  /* Section */
+  .ProseMirror .hljs-section {
+    color: hsl(212 97% 81%);
+    font-weight: bold;
+  }
+
+  /* Emphasis */
+  .ProseMirror .hljs-emphasis {
+    font-style: italic;
+  }
+
+  /* Strong */
+  .ProseMirror .hljs-strong {
+    font-weight: bold;
+  }
+
+  /* Punctuation */
+  .ProseMirror .hljs-punctuation {
+    color: hsl(210 14% 66%);
+  }
+
+  /* ==========================================================================
+     Table Styles
+     ========================================================================== */
   .ProseMirror table {
     border-spacing: 0;
     border-collapse: collapse;
@@ -1439,7 +1580,7 @@ export const TiptapEditor = ({
 
   return (
     <TipTapContext.Provider value={sharedValues}>
-      <style>{tableStyles}</style>
+      <style>{editorStyles}</style>
       {children}
 
       {floatingMenu}
@@ -1671,7 +1812,7 @@ export const TiptapDropdown = ({
   )
 }
 
-export interface TiptapToolbarProps extends ComponentProps<"div"> {}
+export interface TiptapToolbarProps extends ComponentProps<"div"> { }
 
 export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
   <div
@@ -1683,7 +1824,7 @@ export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
 export interface TiptapContentProps extends Omit<
   ComponentProps<typeof EditorContent>,
   "editor"
-> {}
+> { }
 
 export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
   const { editor } = useContext(TipTapContext)
@@ -1701,7 +1842,7 @@ export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
 export interface TipTapFloatingMenuProps extends Omit<
   ComponentProps<typeof FloatingMenu>,
   "editor"
-> {}
+> { }
 
 export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
   const { editor } = useContext(TipTapContext)
@@ -1736,7 +1877,7 @@ export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
 export interface TipTapBubbleMenuProps extends Omit<
   ComponentProps<typeof BubbleMenu>,
   "editor" | "children"
-> {}
+> { }
 
 export const TipTapBubbleMenu = (props: TipTapBubbleMenuProps) => {
   const { editor } = useContext(TipTapContext)
