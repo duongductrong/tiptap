@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "db": "npx drizzle-kit",
-    "registry:build": "shadcn build --output public/schema"
+    "registry:build": "shadcn build --output public/schema",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@auth/unstorage-adapter": "^2.7.4",

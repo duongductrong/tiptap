@@ -87,6 +87,9 @@ import {
   Type,
   Underline,
   Undo,
+  AlignVerticalJustifyStart,
+  AlignVerticalJustifyCenter,
+  AlignVerticalJustifyEnd,
 } from "lucide-react"
 import React, {
   Children,
@@ -614,7 +617,6 @@ const extensions = [
    */
   TextAlign.configure({
     types: ["heading", "paragraph", "blockquote", "bulletList", "orderedList"],
-    defaultAlignment: "left",
   }),
 
   /**
@@ -662,13 +664,75 @@ const extensions = [
         "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
     },
   }),
-  TiptapTableHeader.configure({
+  TiptapTableHeader.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        textAlign: {
+          default: null,
+          parseHTML: (element) =>
+            element.style.textAlign || element.getAttribute("data-text-align"),
+          renderHTML: (attributes) => {
+            if (!attributes.textAlign) return {}
+            return {
+              style: `text-align: ${attributes.textAlign}`,
+              "data-text-align": attributes.textAlign,
+            }
+          },
+        },
+        verticalAlign: {
+          default: null,
+          parseHTML: (element) =>
+            element.style.verticalAlign ||
+            element.getAttribute("data-vertical-align"),
+          renderHTML: (attributes) => {
+            if (!attributes.verticalAlign) return {}
+            return {
+              style: `vertical-align: ${attributes.verticalAlign}`,
+              "data-vertical-align": attributes.verticalAlign,
+            }
+          },
+        },
+      }
+    },
+  }).configure({
     HTMLAttributes: {
       class:
         "h-10 px-2 text-left align-middle font-medium text-muted-foreground border-b border-r last:border-r-none bg-muted/10 [&>p]:m-0",
     },
   }),
-  TiptapTableCell.configure({
+  TiptapTableCell.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        textAlign: {
+          default: null,
+          parseHTML: (element) =>
+            element.style.textAlign || element.getAttribute("data-text-align"),
+          renderHTML: (attributes) => {
+            if (!attributes.textAlign) return {}
+            return {
+              style: `text-align: ${attributes.textAlign}`,
+              "data-text-align": attributes.textAlign,
+            }
+          },
+        },
+        verticalAlign: {
+          default: null,
+          parseHTML: (element) =>
+            element.style.verticalAlign ||
+            element.getAttribute("data-vertical-align"),
+          renderHTML: (attributes) => {
+            if (!attributes.verticalAlign) return {}
+            return {
+              style: `vertical-align: ${attributes.verticalAlign}`,
+              "data-vertical-align": attributes.verticalAlign,
+            }
+          },
+        },
+      }
+    },
+  }).configure({
     HTMLAttributes: {
       class:
         "p-2 align-middle border-b [&:not(:last-child)]:border-r [&>p]:m-0",
@@ -1688,6 +1752,12 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
             )}
           >
             <DropdownMenuItem
+              onClick={() => editor.chain().focus().toggleHeaderColumn().run()}
+            >
+              <TableProperties className="mr-2 size-3.5" />
+              Toggle Header
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={() => editor.chain().focus().addColumnBefore().run()}
             >
               <ArrowLeftToLine className="mr-2 size-3.5" />
@@ -1699,18 +1769,50 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
               <ArrowRightToLine className="mr-2 size-3.5" />
               Insert After
             </DropdownMenuItem>
+            <div className="my-1 h-px bg-border" />
+            <DropdownMenuItem
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setCellAttribute("textAlign", "left")
+                  .run()
+              }
+            >
+              <AlignLeft className="mr-2 size-3.5" />
+              Align Left
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setCellAttribute("textAlign", "center")
+                  .run()
+              }
+            >
+              <AlignCenter className="mr-2 size-3.5" />
+              Align Center
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setCellAttribute("textAlign", "right")
+                  .run()
+              }
+            >
+              <AlignRight className="mr-2 size-3.5" />
+              Align Right
+            </DropdownMenuItem>
+            <div className="my-1 h-px bg-border" />
             <DropdownMenuItem
               onClick={() => editor.chain().focus().deleteColumn().run()}
               className="text-destructive focus:text-destructive"
             >
               <Trash2 className="mr-2 size-3.5" />
               Delete Column
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => editor.chain().focus().toggleHeaderColumn().run()}
-            >
-              <TableProperties className="mr-2 size-3.5" />
-              Toggle Header
             </DropdownMenuItem>
           </DropdownMenuContentPrimitive>
         </DropdownMenu>
@@ -1738,6 +1840,12 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
             )}
           >
             <DropdownMenuItem
+              onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+            >
+              <TableProperties className="mr-2 size-3.5" />
+              Toggle Header
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={() => editor.chain().focus().addRowBefore().run()}
             >
               <ArrowUpToLine className="mr-2 size-3.5" />
@@ -1749,18 +1857,51 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
               <ArrowDownToLine className="mr-2 size-3.5" />
               Insert Below
             </DropdownMenuItem>
+
+            <div className="my-1 h-px bg-border" />
+            <DropdownMenuItem
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setCellAttribute("verticalAlign", "top")
+                  .run()
+              }
+            >
+              <AlignVerticalJustifyStart className="mr-2 size-3.5" />
+              Align Top
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setCellAttribute("verticalAlign", "middle")
+                  .run()
+              }
+            >
+              <AlignVerticalJustifyCenter className="mr-2 size-3.5" />
+              Align Middle
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setCellAttribute("verticalAlign", "bottom")
+                  .run()
+              }
+            >
+              <AlignVerticalJustifyEnd className="mr-2 size-3.5" />
+              Align Bottom
+            </DropdownMenuItem>
+            <div className="my-1 h-px bg-border" />
             <DropdownMenuItem
               onClick={() => editor.chain().focus().deleteRow().run()}
               className="text-destructive focus:text-destructive"
             >
               <Trash2 className="mr-2 size-3.5" />
               Delete Row
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => editor.chain().focus().toggleHeaderRow().run()}
-            >
-              <TableProperties className="mr-2 size-3.5" />
-              Toggle Header
             </DropdownMenuItem>
           </DropdownMenuContentPrimitive>
         </DropdownMenu>
