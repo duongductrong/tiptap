@@ -2,7 +2,7 @@ import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { ChevronDown } from "lucide-react"
 import * as React from "react"
 
-import { cn } from "@/lib/tw"
+import { cn } from "@/lib/utils"
 import { tv } from "tailwind-variants"
 
 const NavigationMenu = React.forwardRef<

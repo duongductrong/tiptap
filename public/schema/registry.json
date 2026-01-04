@@ -1,0 +1,49 @@
+{
+    "$schema": "https://ui.shadcn.com/schema/registry.json",
+    "name": "tiptap-registry",
+    "homepage": "https://yourdomain.com",
+    "items": [
+        {
+            "name": "tiptap",
+            "type": "registry:block",
+            "title": "Tiptap Editor",
+            "description": "A fully-featured rich text editor built with Tiptap, including toolbar, bubble menu, floating menu, and image support.",
+            "dependencies": [
+                "@tiptap/core",
+                "@tiptap/react",
+                "@tiptap/starter-kit",
+                "@tiptap/extension-text-align",
+                "@tiptap/extension-typography",
+                "@tiptap/extension-underline",
+                "@tiptap/extension-code-block-lowlight",
+                "lowlight",
+                "lucide-react"
+            ],
+            "registryDependencies": [
+                "button",
+                "dropdown-menu",
+                "scroll-area",
+                "dialog",
+                "input"
+            ],
+            "files": [
+                {
+                    "path": "src/registry/tiptap/tiptap.tsx",
+                    "type": "registry:block"
+                },
+                {
+                    "path": "src/registry/tiptap/extensions/code-block.tsx",
+                    "type": "registry:block"
+                },
+                {
+                    "path": "src/registry/tiptap/extensions/image.tsx",
+                    "type": "registry:block"
+                },
+                {
+                    "path": "src/registry/tiptap/widgets/image.tsx",
+                    "type": "registry:block"
+                }
+            ]
+        }
+    ]
+}

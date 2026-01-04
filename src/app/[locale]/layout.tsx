@@ -2,7 +2,7 @@
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { routing } from "@/i18n/routing"
 import { TanstackQueryClientProvider } from "@/lib/tanstack-query"
-import { cn } from "@/lib/tw"
+import { cn } from "@/lib/utils"
 import type { Metadata } from "next"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"

@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/tw"
+import { cn } from "@/lib/utils"
 import { TextAlign } from "@tiptap/extension-text-align"
 import TiptapTypography from "@tiptap/extension-typography"
 import TiptapUnderline from "@tiptap/extension-underline"
@@ -678,7 +678,7 @@ export const TiptapDropdown = ({
   )
 }
 
-export interface TiptapToolbarProps extends ComponentProps<"div"> {}
+export interface TiptapToolbarProps extends ComponentProps<"div"> { }
 
 export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
   <div
@@ -688,7 +688,7 @@ export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
 )
 
 export interface TiptapContentProps
-  extends Omit<ComponentProps<typeof EditorContent>, "editor"> {}
+  extends Omit<ComponentProps<typeof EditorContent>, "editor"> { }
 
 export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
   const { editor } = useContext(TipTapContext)
@@ -704,7 +704,7 @@ export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
   )
 }
 export interface TipTapFloatingMenuProps
-  extends Omit<ComponentProps<typeof FloatingMenu>, "editor"> {}
+  extends Omit<ComponentProps<typeof FloatingMenu>, "editor"> { }
 
 export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
   const { editor } = useContext(TipTapContext)
@@ -737,7 +737,7 @@ export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
 }
 
 export interface TipTapBubbleMenuProps
-  extends Omit<ComponentProps<typeof BubbleMenu>, "editor"> {}
+  extends Omit<ComponentProps<typeof BubbleMenu>, "editor"> { }
 
 export const TipTapBubbleMenu = (props: TipTapBubbleMenuProps) => {
   const { editor } = useContext(TipTapContext)
@@ -763,8 +763,8 @@ export function useTiptapEditorIsActive(key: TiptapAction) {
   return !editor
     ? false
     : tiptapTextAlignActiveActions.includes(key)
-    ? editor?.isActive({ textAlign: key })
-    : editor?.isActive(key)
+      ? editor?.isActive({ textAlign: key })
+      : editor?.isActive(key)
 }
 
 export function onTiptapEventChangeBlock(

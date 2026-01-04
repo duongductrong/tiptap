@@ -1,7 +1,7 @@
-import { cn } from "@/lib/tw"
+import { cn } from "@/lib/utils"
 import { ComponentProps } from "react"
 
-export interface InputProps extends ComponentProps<"input"> {}
+export interface InputProps extends ComponentProps<"input"> { }
 
 const Input = ({ className, type, ref, ...props }: InputProps) => {
   return (
