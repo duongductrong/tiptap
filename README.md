@@ -69,21 +69,6 @@ export default function MyEditor() {
 | **Table** | Tables with resizable columns and headers |
 | **SlashMenu** | Notion-style slash commands |
 
-## Supported Languages (Code Blocks)
-
-JavaScript, TypeScript, JSX, TSX, HTML, CSS, SCSS, JSON, Markdown, Python, Java, C, C++, C#, Go, Rust, Ruby, PHP, Swift, Kotlin, Scala, SQL, GraphQL, Shell, PowerShell, Docker, YAML, XML, Diff, and more.
-
-## Components
-
-- `TiptapEditor` — Root provider component with editor configuration
-- `TiptapToolbar` — Customizable toolbar with formatting buttons
-- `TiptapContent` — Editable content area
-- `TiptapBubbleMenu` — Floating menu for text selection
-- `TiptapFloatingMenu` — Floating menu for empty lines
-- `TableBubbleMenu` — Context menu for table operations
-- `SlashMenuList` — Slash command suggestion list
-- `ImageWidget` — Media library dialog for image selection
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

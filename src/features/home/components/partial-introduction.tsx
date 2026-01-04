@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { motion, Variants } from "motion/react"
 import { ArrowRight, Copy, Check } from "lucide-react"
 import { useState } from "react"
+import Link from "next/link"
 
 export interface PartialIntroductionProps { }
 
@@ -94,8 +95,8 @@ const PartialIntroduction = () => {
           Get Started
           <ArrowRight className="size-4" />
         </Button>
-        <Button variant="ghost" size="lg">
-          View Examples
+        <Button variant="ghost" size="lg" asChild>
+          <Link href="/playground">View Examples</Link>
         </Button>
       </motion.div>
     </motion.div>
