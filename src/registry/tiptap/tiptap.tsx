@@ -843,7 +843,7 @@ const extensions = [
   Highlight.configure({
     multicolor: false,
     HTMLAttributes: {
-      class: "bg-yellow-200 dark:bg-yellow-500/30 px-0.5 rounded",
+      class: "bg-yellow-200 dark:bg-yellow-500 px-0.5 rounded",
     },
   }),
 ]
