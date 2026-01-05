@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip"
 import { Plus } from "lucide-react"
 
-export interface PartialEditorAddExtensionProps {}
+export interface PartialEditorAddExtensionProps { }
 
 const PartialEditorAddExtension = (props: PartialEditorAddExtensionProps) => {
   return (
@@ -23,7 +23,7 @@ const PartialEditorAddExtension = (props: PartialEditorAddExtensionProps) => {
             <Plus className="size-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" shadowArrow>
+        <TooltipContent side="bottom">
           Add custom extension
         </TooltipContent>
       </Tooltip>

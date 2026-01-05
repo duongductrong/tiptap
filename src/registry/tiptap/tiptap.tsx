@@ -850,36 +850,6 @@ const extensions = [
 
 const editorStyles = `
   /* ==========================================================================
-     Code Block Styles
-     ========================================================================== */
-  .ProseMirror pre {
-    background: oklch(0.2147 0.0058 285.9);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin: 1rem 0;
-    overflow-x: auto;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size: 0.875rem;
-    line-height: 1.7;
-    color: hsl(210 14% 83%);
-  }
-  .ProseMirror pre code {
-    background: transparent;
-    padding: 0;
-    font-size: inherit;
-    color: inherit;
-    font-family: inherit;
-  }
-  .ProseMirror code {
-    background: hsl(var(--muted));
-    border-radius: 0.25rem;
-    padding: 0.125rem 0.375rem;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
-    font-size: 0.875em;
-  }
-
-  /* ==========================================================================
      Syntax Highlighting Theme (GitHub Dark-inspired)
      ========================================================================== */
   /* Comments */
@@ -891,8 +861,7 @@ const editorStyles = `
 
   /* Keywords & Tags */
   .ProseMirror .hljs-keyword,
-  .ProseMirror .hljs-selector-tag,
-  .ProseMirror .hljs-addition {
+  .ProseMirror .hljs-selector-tag {
     color: hsl(350 89% 72%);
   }
 
@@ -988,109 +957,39 @@ const editorStyles = `
   }
 
   /* ==========================================================================
-     Table Styles
+     Complex Pseudo-element Styles (cannot be expressed in Tailwind)
      ========================================================================== */
-  .ProseMirror table {
-    border-spacing: 0;
-    border-collapse: collapse;
-    table-layout: fixed;
-    width: 100%;
-    overflow: hidden;
+  /* Pre code reset */
+  .ProseMirror pre code {
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+    font-family: inherit;
   }
-  .ProseMirror table td,
-  .ProseMirror table th {
-    min-width: 1em;
-    box-sizing: border-box;
-    position: relative;
-    vertical-align: top;
-  }
-  .ProseMirror table th {
-    font-weight: 500;
-  }
-  .ProseMirror table .selectedCell {
-    background: hsl(var(--muted) / 0.05);
-  }
+
+  /* Selected cell overlay */
   .ProseMirror table .selectedCell::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: hsl(var(--primary) / 0.08);
+    background: var(--primary);
+    opacity: 0.08;
     pointer-events: none;
-  }
-  .ProseMirror .column-resize-handle {
-    position: absolute;
-    right: -2px;
-    top: 0;
-    bottom: -2px;
-    width: 4px;
-    background-color: hsl(var(--primary));
-    cursor: col-resize;
-    z-index: 20;
-  }
-  .ProseMirror.resize-cursor {
-    cursor: col-resize;
-  }
-  .ProseMirror .tableWrapper {
-    overflow-x: auto;
-    margin: 1rem 0;
-  }
-  .ProseMirror .tableWrapper > table > colgroup {
-    border: 1px solid hsl(var(--border));
   }
 
-  /* ==========================================================================
-     Placeholder Styles
-     ========================================================================== */
-  .ProseMirror p.is-empty::before {
-    color: hsl(var(--muted-foreground));
-    content: attr(data-placeholder);
-    float: left;
-    height: 0;
-    pointer-events: none;
-  }
+  /* Heading placeholders */
   .ProseMirror h1.is-empty::before,
   .ProseMirror h2.is-empty::before,
   .ProseMirror h3.is-empty::before,
   .ProseMirror h4.is-empty::before,
   .ProseMirror h5.is-empty::before,
   .ProseMirror h6.is-empty::before {
-    color: hsl(var(--muted-foreground));
+    color: var(--muted-foreground);
     content: attr(data-placeholder);
     float: left;
     height: 0;
     pointer-events: none;
-  }
-
-  /* ==========================================================================
-     Task List Styles
-     ========================================================================== */
-  .ProseMirror ul[data-type="taskList"] {
-    list-style: none;
-    padding-left: 0;
-    margin: 0.5rem 0;
-  }
-  .ProseMirror ul[data-type="taskList"] li {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    margin: 0.25rem 0;
-  }
-  .ProseMirror ul[data-type="taskList"] li > label {
-    flex-shrink: 0;
-    margin-top: 0.125rem;
-  }
-  .ProseMirror ul[data-type="taskList"] li > label > input[type="checkbox"] {
-    cursor: pointer;
-    width: 1rem;
-    height: 1rem;
-    accent-color: hsl(var(--primary));
-  }
-  .ProseMirror ul[data-type="taskList"] li > div {
-    flex: 1;
-  }
-  .ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
-    text-decoration: line-through;
-    opacity: 0.6;
   }
 `
 
@@ -1990,7 +1889,84 @@ export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
   return (
     <EditorContent
       {...props}
-      className={cn("w-full [&>*]:outline-none", className)}
+      className={cn(
+        "w-full",
+        "[&>*]:outline-none",
+        // Code block styles
+        "[&_.ProseMirror_pre]:bg-[oklch(0.2147_0.0058_285.9)]",
+        "[&_.ProseMirror_pre]:border",
+        "[&_.ProseMirror_pre]:border-border",
+        "[&_.ProseMirror_pre]:rounded-lg",
+        "[&_.ProseMirror_pre]:p-4",
+        "[&_.ProseMirror_pre]:my-4",
+        "[&_.ProseMirror_pre]:overflow-x-auto",
+        "[&_.ProseMirror_pre]:font-mono",
+        "[&_.ProseMirror_pre]:text-sm",
+        "[&_.ProseMirror_pre]:leading-relaxed",
+        "[&_.ProseMirror_pre]:text-[hsl(210_14%_83%)]",
+        // Inline code styles
+        "[&_.ProseMirror_code]:bg-muted",
+        "[&_.ProseMirror_code]:rounded",
+        "[&_.ProseMirror_code]:px-1.5",
+        "[&_.ProseMirror_code]:py-0.5",
+        "[&_.ProseMirror_code]:font-mono",
+        "[&_.ProseMirror_code]:text-[0.875em]",
+        // Table styles
+        "[&_.ProseMirror_table]:border-spacing-0",
+        "[&_.ProseMirror_table]:border-collapse",
+        "[&_.ProseMirror_table]:table-fixed",
+        "[&_.ProseMirror_table]:w-full",
+        "[&_.ProseMirror_table]:overflow-hidden",
+        "[&_.ProseMirror_table_td]:min-w-4",
+        "[&_.ProseMirror_table_td]:box-border",
+        "[&_.ProseMirror_table_td]:relative",
+        "[&_.ProseMirror_table_td]:align-top",
+        "[&_.ProseMirror_table_th]:min-w-4",
+        "[&_.ProseMirror_table_th]:box-border",
+        "[&_.ProseMirror_table_th]:relative",
+        "[&_.ProseMirror_table_th]:align-top",
+        "[&_.ProseMirror_table_th]:font-medium",
+        "[&_.ProseMirror_table_.selectedCell]:bg-secondary/5",
+        // Table wrapper
+        "[&_.ProseMirror_.tableWrapper]:overflow-x-auto",
+        "[&_.ProseMirror_.tableWrapper]:my-4",
+        "[&_.ProseMirror_.tableWrapper_>_table_>_colgroup]:border",
+        "[&_.ProseMirror_.tableWrapper_>_table_>_colgroup]:border-border",
+        // Column resize handle
+        "[&_.ProseMirror_.column-resize-handle]:absolute",
+        "[&_.ProseMirror_.column-resize-handle]:-right-0.5",
+        "[&_.ProseMirror_.column-resize-handle]:top-0",
+        "[&_.ProseMirror_.column-resize-handle]:-bottom-0.5",
+        "[&_.ProseMirror_.column-resize-handle]:w-1",
+        "[&_.ProseMirror_.column-resize-handle]:bg-primary",
+        "[&_.ProseMirror_.column-resize-handle]:cursor-col-resize",
+        "[&_.ProseMirror_.column-resize-handle]:z-20",
+        // Resize cursor
+        "[&_.ProseMirror.resize-cursor]:cursor-col-resize",
+        // Placeholder styles (paragraph)
+        "[&_.ProseMirror_p.is-empty]:before:text-muted-foreground",
+        "[&_.ProseMirror_p.is-empty]:before:content-[attr(data-placeholder)]",
+        "[&_.ProseMirror_p.is-empty]:before:float-left",
+        "[&_.ProseMirror_p.is-empty]:before:h-0",
+        "[&_.ProseMirror_p.is-empty]:before:pointer-events-none",
+        // Task list styles
+        "[&_.ProseMirror_ul[data-type=taskList]]:list-none",
+        "[&_.ProseMirror_ul[data-type=taskList]]:pl-0",
+        "[&_.ProseMirror_ul[data-type=taskList]]:my-2",
+        "[&_.ProseMirror_ul[data-type=taskList]_li]:flex",
+        "[&_.ProseMirror_ul[data-type=taskList]_li]:items-start",
+        "[&_.ProseMirror_ul[data-type=taskList]_li]:gap-2",
+        "[&_.ProseMirror_ul[data-type=taskList]_li]:my-1",
+        "[&_.ProseMirror_ul[data-type=taskList]_li_>_label]:shrink-0",
+        "[&_.ProseMirror_ul[data-type=taskList]_li_>_label]:mt-0.5",
+        "[&_.ProseMirror_ul[data-type=taskList]_li_>_label_>_input[type=checkbox]]:cursor-pointer",
+        "[&_.ProseMirror_ul[data-type=taskList]_li_>_label_>_input[type=checkbox]]:size-4",
+        "[&_.ProseMirror_ul[data-type=taskList]_li_>_label_>_input[type=checkbox]]:accent-primary",
+        "[&_.ProseMirror_ul[data-type=taskList]_li_>_div]:flex-1",
+        "[&_.ProseMirror_ul[data-type=taskList]_li[data-checked=true]_>_div]:line-through",
+        "[&_.ProseMirror_ul[data-type=taskList]_li[data-checked=true]_>_div]:opacity-60",
+        className
+      )}
       editor={editor}
     />
   )
