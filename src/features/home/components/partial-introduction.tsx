@@ -91,11 +91,11 @@ const PartialIntroduction = () => {
         variants={itemVariants}
         className="mt-8 flex flex-wrap items-center justify-center gap-4"
       >
-        <Button size="lg" className="gap-2">
+        <Button className="gap-2">
           Get Started
           <ArrowRight className="size-4" />
         </Button>
-        <Button variant="ghost" size="lg" asChild>
+        <Button variant="ghost" asChild>
           <Link href="/playground">View Examples</Link>
         </Button>
       </motion.div>
