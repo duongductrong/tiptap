@@ -853,8 +853,8 @@ const editorStyles = `
      Code Block Styles
      ========================================================================== */
   .ProseMirror pre {
-    background: hsl(220 13% 18%);
-    border: 1px solid hsl(var(--border));
+    background: oklch(0.2147 0.0058 285.9);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1rem;
     margin: 1rem 0;
@@ -2389,7 +2389,7 @@ export const CodeBlockBubbleMenu = (props: CodeBlockBubbleMenuProps) => {
     const { from } = state.selection
     const node = state.doc.nodeAt(from)
 
-    if (node && node.type.name === "codeBlock") {
+    if (node && ["codeBlock", "text"].includes(node.type.name)) {
       const code = node.textContent
       await navigator.clipboard.writeText(code)
       setCopied(true)
