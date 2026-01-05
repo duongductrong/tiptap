@@ -518,7 +518,7 @@ export const SlashMenuList = React.forwardRef<
           )}
         >
           <div
-            className="flex size-8 items-center justify-center rounded-lg border border-border bg-background"
+            className="flex size-8 items-center justify-center rounded-lg border border-border bg-background/40"
             aria-hidden="true"
           >
             <item.icon size={16} strokeWidth={2} className="opacity-60" />
