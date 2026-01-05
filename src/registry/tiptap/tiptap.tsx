@@ -39,6 +39,11 @@ import {
   TableRow as TiptapTableRow,
 } from "@tiptap/extension-table"
 
+import Highlight from "@tiptap/extension-highlight"
+import Link from "@tiptap/extension-link"
+import Placeholder from "@tiptap/extension-placeholder"
+import TaskItem from "@tiptap/extension-task-item"
+import TaskList from "@tiptap/extension-task-list"
 import { TextAlign } from "@tiptap/extension-text-align"
 import TiptapTypography from "@tiptap/extension-typography"
 import TiptapUnderline from "@tiptap/extension-underline"
@@ -101,6 +106,10 @@ import {
   AlignVerticalJustifyStart,
   AlignVerticalJustifyCenter,
   AlignVerticalJustifyEnd,
+  Link2,
+  Link2Off,
+  Highlighter,
+  ExternalLink,
 } from "lucide-react"
 import React, {
   Children,
@@ -409,14 +418,7 @@ const slashMenuItems: SlashMenuItem[] = [
     description: "Task list with checkboxes",
     icon: CheckSquare,
     searchTerms: ["todo", "task", "checkbox", "checklist"],
-    command: (editor) => {
-      // TaskList extension not included - placeholder
-      editor
-        .chain()
-        .focus()
-        .insertContent("⚠️ TaskList extension not installed")
-        .run()
-    },
+    command: (editor) => editor.chain().focus().toggleTaskList().run(),
   },
 ]
 
@@ -791,6 +793,59 @@ const extensions = [
         "p-2 align-middle border-b [&:not(:last-child)]:border-r [&>p]:m-0",
     },
   }),
+
+  /**
+   * @description Link support for hyperlinks
+   * @reference https://tiptap.dev/docs/editor/extensions/marks/link
+   */
+  Link.configure({
+    openOnClick: false,
+    HTMLAttributes: {
+      class: "text-primary underline underline-offset-4 hover:text-primary/80 cursor-pointer",
+    },
+  }),
+
+  /**
+   * @description Task list with checkboxes
+   * @reference https://tiptap.dev/docs/editor/extensions/nodes/task-list
+   */
+  TaskList.configure({
+    HTMLAttributes: {
+      class: "not-prose pl-0 list-none",
+    },
+  }),
+  TaskItem.configure({
+    nested: true,
+    HTMLAttributes: {
+      class: "flex items-start gap-2 [&>label]:mt-0.5",
+    },
+  }),
+
+  /**
+   * @description Placeholder text for empty editor
+   * @reference https://tiptap.dev/docs/editor/extensions/functionality/placeholder
+   */
+  Placeholder.configure({
+    placeholder: ({ node }) => {
+      if (node.type.name === "heading") {
+        return `Heading ${node.attrs.level}`
+      }
+      return "Type '/' for commands..."
+    },
+    emptyEditorClass: "is-editor-empty",
+    emptyNodeClass: "is-empty",
+  }),
+
+  /**
+   * @description Highlight text with background color
+   * @reference https://tiptap.dev/docs/editor/extensions/marks/highlight
+   */
+  Highlight.configure({
+    multicolor: false,
+    HTMLAttributes: {
+      class: "bg-yellow-200 dark:bg-yellow-500/30 px-0.5 rounded",
+    },
+  }),
 ]
 
 const editorStyles = `
@@ -982,6 +1037,61 @@ const editorStyles = `
   .ProseMirror .tableWrapper > table > colgroup {
     border: 1px solid hsl(var(--border));
   }
+
+  /* ==========================================================================
+     Placeholder Styles
+     ========================================================================== */
+  .ProseMirror p.is-empty::before {
+    color: hsl(var(--muted-foreground));
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+  .ProseMirror h1.is-empty::before,
+  .ProseMirror h2.is-empty::before,
+  .ProseMirror h3.is-empty::before,
+  .ProseMirror h4.is-empty::before,
+  .ProseMirror h5.is-empty::before,
+  .ProseMirror h6.is-empty::before {
+    color: hsl(var(--muted-foreground));
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* ==========================================================================
+     Task List Styles
+     ========================================================================== */
+  .ProseMirror ul[data-type="taskList"] {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.5rem 0;
+  }
+  .ProseMirror ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+  }
+  .ProseMirror ul[data-type="taskList"] li > label {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+  .ProseMirror ul[data-type="taskList"] li > label > input[type="checkbox"] {
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+    accent-color: hsl(var(--primary));
+  }
+  .ProseMirror ul[data-type="taskList"] li > div {
+    flex: 1;
+  }
+  .ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
 `
 
 const tiptapActions = {
@@ -1030,6 +1140,13 @@ const tiptapActions = {
   mergeOrSplit: "mergeOrSplit",
   goToNextCell: "goToNextCell",
   goToPreviousCell: "goToPreviousCell",
+  // @tiptap/extension-task-list
+  taskList: "taskList",
+  // @tiptap/extension-highlight
+  highlight: "highlight",
+  // @tiptap/extension-link
+  setLink: "setLink",
+  unsetLink: "unsetLink",
 } as const
 
 const tiptapTextAlignActiveActions = [
@@ -1386,6 +1503,45 @@ const tiptapBlocksMap = new Map<TiptapAction, TiptapBlock>([
       icon: Trash2,
       label: "Delete Table",
       description: "Remove entire table",
+    },
+  ],
+  // Task list
+  [
+    tiptapActions.taskList,
+    {
+      key: tiptapActions.taskList,
+      icon: CheckSquare,
+      label: "Task List",
+      description: "Create a task list with checkboxes",
+    },
+  ],
+  // Highlight
+  [
+    tiptapActions.highlight,
+    {
+      key: tiptapActions.highlight,
+      icon: Highlighter,
+      label: "Highlight",
+      description: "Highlight selected text",
+    },
+  ],
+  // Links
+  [
+    tiptapActions.setLink,
+    {
+      key: tiptapActions.setLink,
+      icon: Link2,
+      label: "Add Link",
+      description: "Insert a hyperlink",
+    },
+  ],
+  [
+    tiptapActions.unsetLink,
+    {
+      key: tiptapActions.unsetLink,
+      icon: Link2Off,
+      label: "Remove Link",
+      description: "Remove the hyperlink",
     },
   ],
 ])
@@ -2341,9 +2497,334 @@ export const CodeBlockBubbleMenu = (props: CodeBlockBubbleMenuProps) => {
   )
 }
 
+// =============================================================================
+// Text Formatting Bubble Menu
+// =============================================================================
+
+export interface TextBubbleMenuProps extends Omit<
+  ComponentProps<typeof BubbleMenu>,
+  "editor" | "children"
+> {
+  children?: React.ReactNode
+}
+
+export const TextBubbleMenu = (props: TextBubbleMenuProps) => {
+  const { editor } = useContext(TipTapContext)
+  const [linkUrl, setLinkUrl] = useState("")
+  const [showLinkInput, setShowLinkInput] = useState(false)
+
+  if (!editor) return null
+
+  const handleSetLink = () => {
+    if (linkUrl) {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: linkUrl })
+        .run()
+      setLinkUrl("")
+      setShowLinkInput(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleSetLink()
+    }
+    if (e.key === "Escape") {
+      setShowLinkInput(false)
+      setLinkUrl("")
+    }
+  }
+
+  return (
+    <BubbleMenu
+      {...props}
+      editor={editor}
+      tippyOptions={{
+        duration: 100,
+        placement: "top",
+      }}
+      shouldShow={({ editor, from, to }) => {
+        // Only show for text selections, not tables/codeblocks/images
+        if (from === to) return false
+        if (editor.isActive("table")) return false
+        if (editor.isActive("codeBlock")) return false
+        if (editor.isActive("image")) return false
+        return true
+      }}
+      className="w-fit"
+    >
+      <div className="flex items-center gap-0.5 rounded-md border bg-popover p-0.5 shadow-md">
+        {showLinkInput ? (
+          <div className="flex items-center gap-1 p-1">
+            <Input
+              type="url"
+              placeholder="https://..."
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="h-7 w-48 text-xs"
+              autoFocus
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={handleSetLink}
+            >
+              <Check className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => {
+                setShowLinkInput(false)
+                setLinkUrl("")
+              }}
+            >
+              <Link2Off className="size-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Bold */}
+            <Button
+              variant={editor.isActive("bold") ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              title="Bold"
+            >
+              <Bold className="size-3.5" />
+            </Button>
+
+            {/* Italic */}
+            <Button
+              variant={editor.isActive("italic") ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              title="Italic"
+            >
+              <Italic className="size-3.5" />
+            </Button>
+
+            {/* Underline */}
+            <Button
+              variant={editor.isActive("underline") ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              title="Underline"
+            >
+              <Underline className="size-3.5" />
+            </Button>
+
+            {/* Strikethrough */}
+            <Button
+              variant={editor.isActive("strike") ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              title="Strikethrough"
+            >
+              <Strikethrough className="size-3.5" />
+            </Button>
+
+            {/* Code */}
+            <Button
+              variant={editor.isActive("code") ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => editor.chain().focus().toggleCode().run()}
+              title="Code"
+            >
+              <Code className="size-3.5" />
+            </Button>
+
+            <div className="h-4 w-px bg-border" />
+
+            {/* Highlight */}
+            <Button
+              variant={editor.isActive("highlight") ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => editor.chain().focus().toggleHighlight().run()}
+              title="Highlight"
+            >
+              <Highlighter className="size-3.5" />
+            </Button>
+
+            <div className="h-4 w-px bg-border" />
+
+            {/* Link */}
+            {editor.isActive("link") ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => editor.chain().focus().unsetLink().run()}
+                title="Remove Link"
+              >
+                <Link2Off className="size-3.5" />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => setShowLinkInput(true)}
+                title="Add Link"
+              >
+                <Link2 className="size-3.5" />
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+    </BubbleMenu>
+  )
+}
+
+// =============================================================================
+// Link Bubble Menu (for editing existing links)
+// =============================================================================
+
+export interface LinkBubbleMenuProps extends Omit<
+  ComponentProps<typeof BubbleMenu>,
+  "editor" | "children"
+> {
+  children?: React.ReactNode
+}
+
+export const LinkBubbleMenu = (props: LinkBubbleMenuProps) => {
+  const { editor } = useContext(TipTapContext)
+  const [isEditing, setIsEditing] = useState(false)
+  const [linkUrl, setLinkUrl] = useState("")
+
+  if (!editor) return null
+
+  const currentLink = editor.getAttributes("link").href || ""
+
+  const handleEditLink = () => {
+    setLinkUrl(currentLink)
+    setIsEditing(true)
+  }
+
+  const handleSaveLink = () => {
+    if (linkUrl) {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: linkUrl })
+        .run()
+    }
+    setIsEditing(false)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleSaveLink()
+    }
+    if (e.key === "Escape") {
+      setIsEditing(false)
+    }
+  }
+
+  const handleOpenLink = () => {
+    if (currentLink) {
+      window.open(currentLink, "_blank", "noopener,noreferrer")
+    }
+  }
+
+  return (
+    <BubbleMenu
+      {...props}
+      editor={editor}
+      tippyOptions={{
+        duration: 100,
+        placement: "bottom",
+      }}
+      shouldShow={({ editor, from, to }) => {
+        // Only show when cursor is on a link (not selecting text)
+        if (from !== to) return false
+        return editor.isActive("link")
+      }}
+      className="w-fit"
+    >
+      <div className="flex items-center gap-0.5 rounded-md border bg-popover p-0.5 shadow-md">
+        {isEditing ? (
+          <div className="flex items-center gap-1 px-1">
+            <Input
+              type="url"
+              placeholder="https://..."
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="h-7 w-48 text-xs"
+              autoFocus
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={handleSaveLink}
+            >
+              <Check className="size-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 px-2 text-xs font-normal max-w-[200px] truncate"
+              onClick={handleEditLink}
+              title="Edit link"
+            >
+              <Link2 className="size-3.5 shrink-0" />
+              <span className="truncate">{currentLink}</span>
+            </Button>
+
+            <div className="h-4 w-px bg-border" />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={handleOpenLink}
+              title="Open link"
+            >
+              <ExternalLink className="size-3.5" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+              onClick={() => editor.chain().focus().unsetLink().run()}
+              title="Remove link"
+            >
+              <Link2Off className="size-3.5" />
+            </Button>
+          </>
+        )}
+      </div>
+    </BubbleMenu>
+  )
+}
+
 export const TiptapBubbleMenu = () => {
   return (
     <>
+      <TextBubbleMenu />
+      <LinkBubbleMenu />
       <TableBubbleMenu />
       <CodeBlockBubbleMenu />
     </>
@@ -2502,6 +2983,21 @@ export function onTiptapEventChangeBlock(
     case tiptapActions.goToPreviousCell:
       editor.chain().focus().goToPreviousCell().run()
       break
+    // Task list
+    case tiptapActions.taskList:
+      editor.chain().focus().toggleTaskList().run()
+      break
+    // Highlight
+    case tiptapActions.highlight:
+      editor.chain().focus().toggleHighlight().run()
+      break
+    // Link
+    case tiptapActions.setLink:
+      // Link is handled via LinkBubbleMenu with URL input
+      break
+    case tiptapActions.unsetLink:
+      editor.chain().focus().unsetLink().run()
+      break
   }
 }
 
@@ -2594,6 +3090,17 @@ export function canUseAction(editor: Editor, action: TiptapAction) {
       return editor.can().chain().focus().goToNextCell().run()
     case tiptapActions.goToPreviousCell:
       return editor.can().chain().focus().goToPreviousCell().run()
+    // Task list
+    case tiptapActions.taskList:
+      return editor.can().chain().focus().toggleTaskList().run()
+    // Highlight
+    case tiptapActions.highlight:
+      return editor.can().chain().focus().toggleHighlight().run()
+    // Link
+    case tiptapActions.setLink:
+      return true
+    case tiptapActions.unsetLink:
+      return editor.isActive("link")
   }
 }
 
