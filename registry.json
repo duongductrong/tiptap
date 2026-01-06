@@ -33,6 +33,10 @@
                 {
                     "path": "src/registry/tiptap/tiptap.tsx",
                     "type": "registry:ui"
+                },
+                {
+                    "path": "src/registry/tiptap/tiptap-image.tsx",
+                    "type": "registry:ui"
                 }
             ]
         }
