@@ -2,12 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -21,17 +15,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { DropdownMenuContent as DropdownMenuContentPrimitive } from "@radix-ui/react-dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { Extension, mergeAttributes, Node } from "@tiptap/core"
-import { TiptapImageExtension } from "./tiptap-image"
+import { DropdownMenuContent as DropdownMenuContentPrimitive } from "@radix-ui/react-dropdown-menu"
+import { Extension } from "@tiptap/core"
+import { ImageBubbleMenu, TiptapImageExtension } from "./tiptap-image"
+
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
 import {
   Table as TiptapTable,
@@ -68,27 +63,34 @@ import {
   AlignJustify,
   AlignLeft,
   AlignRight,
+  AlignVerticalJustifyCenter,
+  AlignVerticalJustifyEnd,
+  AlignVerticalJustifyStart,
   ArrowDownToLine,
   ArrowLeftToLine,
   ArrowRightToLine,
   ArrowUpToLine,
   Bold,
-  CheckSquare,
   Check,
+  CheckSquare,
   ChevronDown,
   ClipboardCopy,
   Code,
   Code2,
   Columns3,
   Combine,
+  ExternalLink,
   Heading1,
   Heading2,
   Heading3,
   Heading4,
   Heading5,
   Heading6,
+  Highlighter,
   ImageUp,
   Italic,
+  Link2,
+  Link2Off,
   List,
   ListOrdered,
   MessageSquare,
@@ -104,13 +106,6 @@ import {
   Type,
   Underline,
   Undo,
-  AlignVerticalJustifyStart,
-  AlignVerticalJustifyCenter,
-  AlignVerticalJustifyEnd,
-  Link2,
-  Link2Off,
-  Highlighter,
-  ExternalLink,
 } from "lucide-react"
 import React, {
   Children,
@@ -377,7 +372,7 @@ export const SlashMenuList = React.forwardRef<
 
   if (items.length === 0) {
     return (
-      <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center p-4 text-sm">
         No results found
       </div>
     )
@@ -389,7 +384,7 @@ export const SlashMenuList = React.forwardRef<
         height:
           items.length * Number(itemRefs.current[0]?.offsetHeight ?? 48) + 8,
       }}
-      className="max-h-[300px] overflow-auto rounded-md border bg-popover p-1 shadow-md"
+      className="bg-popover max-h-[300px] overflow-auto rounded-md border p-1 shadow-md"
     >
       {items.map((item, index) => (
         <button
@@ -399,7 +394,7 @@ export const SlashMenuList = React.forwardRef<
           }}
           onClick={() => selectItem(index)}
           className={cn(
-            "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
+            "relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none select-none",
             "min-w-[256px]",
             index === selectedIndex
               ? "bg-accent text-accent-foreground"
@@ -407,14 +402,14 @@ export const SlashMenuList = React.forwardRef<
           )}
         >
           <div
-            className="flex size-8 items-center justify-center rounded-lg border border-border bg-background/40"
+            className="border-border bg-background/40 flex size-8 items-center justify-center rounded-lg border"
             aria-hidden="true"
           >
             <item.icon size={16} strokeWidth={2} className="opacity-60" />
           </div>
           <div className="flex flex-col items-start">
             <span className="text-sm font-medium">{item.title}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {item.description}
             </span>
           </div>
@@ -671,7 +666,8 @@ const extensions = [
   Link.configure({
     openOnClick: false,
     HTMLAttributes: {
-      class: "text-primary underline underline-offset-4 hover:text-primary/80 cursor-pointer",
+      class:
+        "text-primary underline underline-offset-4 hover:text-primary/80 cursor-pointer",
     },
   }),
 
@@ -1502,7 +1498,7 @@ export const TiptapDivider = (props: ComponentProps<"span">) => {
   if (!editor) return null
 
   return (
-    <span {...props} className="inline-flex items-center gap-2 text-border">
+    <span {...props} className="text-border inline-flex items-center gap-2">
       |
     </span>
   )
@@ -1554,7 +1550,7 @@ export const TiptapDropdown = ({
           >
             {children}
 
-            <ChevronDown className="size-3 text-muted-foreground ml-1" />
+            <ChevronDown className="text-muted-foreground ml-1 size-3" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="pb-2">
@@ -1570,14 +1566,14 @@ export const TiptapDropdown = ({
                 onClick={() => handleChangeBlock(item.key)}
               >
                 <div
-                  className="flex size-8 items-center justify-center rounded-lg border border-border bg-background"
+                  className="border-border bg-background flex size-8 items-center justify-center rounded-lg border"
                   aria-hidden="true"
                 >
                   <item.icon size={16} strokeWidth={2} className="opacity-60" />
                 </div>
                 <div>
                   <div className="text-sm font-medium">{item.label}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {item.description}
                   </div>
                 </div>
@@ -1787,7 +1783,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
       shouldShow={({ editor }) => editor.isActive("table")}
       className="w-fit"
     >
-      <div className="flex items-center gap-0.5 rounded-md border bg-popover p-0.5 shadow-md">
+      <div className="bg-popover flex items-center gap-0.5 rounded-md border p-0.5 shadow-md">
         {/* Column Actions */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
@@ -1806,8 +1802,8 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
             sideOffset={8}
             className={cn(
               "min-w-[160px]",
-              "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
-              "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+              "bg-popover text-popover-foreground z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md",
+              "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]"
             )}
           >
             <DropdownMenuItem
@@ -1828,7 +1824,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
               <ArrowRightToLine className="mr-2 size-3.5" />
               Insert After
             </DropdownMenuItem>
-            <div className="my-1 h-px bg-border" />
+            <div className="bg-border my-1 h-px" />
             <DropdownMenuItem
               onClick={() =>
                 editor
@@ -1865,7 +1861,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
               <AlignRight className="mr-2 size-3.5" />
               Align Right
             </DropdownMenuItem>
-            <div className="my-1 h-px bg-border" />
+            <div className="bg-border my-1 h-px" />
             <DropdownMenuItem
               onClick={() => editor.chain().focus().deleteColumn().run()}
               className="text-destructive focus:text-destructive"
@@ -1894,8 +1890,8 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
             sideOffset={8}
             className={cn(
               "min-w-[160px]",
-              "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
-              "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+              "bg-popover text-popover-foreground z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md",
+              "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]"
             )}
           >
             <DropdownMenuItem
@@ -1917,7 +1913,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
               Insert Below
             </DropdownMenuItem>
 
-            <div className="my-1 h-px bg-border" />
+            <div className="bg-border my-1 h-px" />
             <DropdownMenuItem
               onClick={() =>
                 editor
@@ -1954,7 +1950,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
               <AlignVerticalJustifyEnd className="mr-2 size-3.5" />
               Align Bottom
             </DropdownMenuItem>
-            <div className="my-1 h-px bg-border" />
+            <div className="bg-border my-1 h-px" />
             <DropdownMenuItem
               onClick={() => editor.chain().focus().deleteRow().run()}
               className="text-destructive focus:text-destructive"
@@ -1983,7 +1979,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
             sideOffset={8}
             className={cn(
               "min-w-[160px]",
-              "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+              "bg-popover text-popover-foreground z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-md",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
             )}
           >
@@ -2011,11 +2007,11 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
         </DropdownMenu>
 
         {/* Quick Delete Actions */}
-        <div className="flex items-center gap-0.5 border-l pl-1 ml-0.5">
+        <div className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 gap-1 px-2 text-xs"
             onClick={() => editor.chain().focus().deleteColumn().run()}
             disabled={!canDeleteColumn}
             title="Delete Column"
@@ -2025,7 +2021,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 gap-1 px-2 text-xs"
             onClick={() => editor.chain().focus().deleteRow().run()}
             disabled={!canDeleteRow}
             title="Delete Row"
@@ -2038,7 +2034,7 @@ export const TableBubbleMenu = (props: TableBubbleMenuProps) => {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7 p-0"
           onClick={() => editor.chain().focus().deleteTable().run()}
           title="Delete Table"
         >
@@ -2130,7 +2126,7 @@ export const CodeBlockBubbleMenu = (props: CodeBlockBubbleMenuProps) => {
       shouldShow={({ editor }) => editor.isActive("codeBlock")}
       className="w-fit"
     >
-      <div className="flex items-center gap-0.5 rounded-md border bg-popover p-0.5 shadow-md">
+      <div className="bg-popover flex items-center gap-0.5 rounded-md border p-0.5 shadow-md">
         {/* Language Selector */}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -2175,7 +2171,7 @@ export const CodeBlockBubbleMenu = (props: CodeBlockBubbleMenuProps) => {
         </Popover>
 
         {/* Divider */}
-        <div className="h-4 w-px bg-border" />
+        <div className="bg-border h-4 w-px" />
 
         {/* Copy Button */}
         <Button
@@ -2256,7 +2252,7 @@ export const TextBubbleMenu = (props: TextBubbleMenuProps) => {
       }}
       className="w-fit"
     >
-      <div className="flex items-center gap-0.5 rounded-md border bg-popover p-0.5 shadow-md">
+      <div className="bg-popover flex items-center gap-0.5 rounded-md border p-0.5 shadow-md">
         {showLinkInput ? (
           <div className="flex items-center gap-1 p-1">
             <Input
@@ -2345,7 +2341,7 @@ export const TextBubbleMenu = (props: TextBubbleMenuProps) => {
               <Code className="size-3.5" />
             </Button>
 
-            <div className="h-4 w-px bg-border" />
+            <div className="bg-border h-4 w-px" />
 
             {/* Highlight */}
             <Button
@@ -2358,7 +2354,7 @@ export const TextBubbleMenu = (props: TextBubbleMenuProps) => {
               <Highlighter className="size-3.5" />
             </Button>
 
-            <div className="h-4 w-px bg-border" />
+            <div className="bg-border h-4 w-px" />
 
             {/* Link */}
             {editor.isActive("link") ? (
@@ -2457,7 +2453,7 @@ export const LinkBubbleMenu = (props: LinkBubbleMenuProps) => {
       }}
       className="w-fit"
     >
-      <div className="flex items-center gap-0.5 rounded-md border bg-popover p-0.5 shadow-md">
+      <div className="bg-popover flex items-center gap-0.5 rounded-md border p-0.5 shadow-md">
         {isEditing ? (
           <div className="flex items-center gap-1 px-1">
             <Input
@@ -2483,7 +2479,7 @@ export const LinkBubbleMenu = (props: LinkBubbleMenuProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 gap-1 px-2 text-xs font-normal max-w-[200px] truncate"
+              className="h-7 max-w-[200px] gap-1 truncate px-2 text-xs font-normal"
               onClick={handleEditLink}
               title="Edit link"
             >
@@ -2491,7 +2487,7 @@ export const LinkBubbleMenu = (props: LinkBubbleMenuProps) => {
               <span className="truncate">{currentLink}</span>
             </Button>
 
-            <div className="h-4 w-px bg-border" />
+            <div className="bg-border h-4 w-px" />
 
             <Button
               variant="ghost"
@@ -2506,7 +2502,7 @@ export const LinkBubbleMenu = (props: LinkBubbleMenuProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive h-7 w-7 p-0"
               onClick={() => editor.chain().focus().unsetLink().run()}
               title="Remove link"
             >
@@ -2526,6 +2522,7 @@ export const TiptapBubbleMenu = () => {
       <LinkBubbleMenu />
       <TableBubbleMenu />
       <CodeBlockBubbleMenu />
+      <ImageBubbleMenu />
     </>
   )
 }
