@@ -616,9 +616,9 @@ function ImageNodeView({
   const displayHeight = currentSize?.height ?? node.attrs.height
 
   const alignmentClasses: Record<TiptapImageAlignment, string> = {
-    left: "justify-start",
-    center: "justify-center",
-    right: "justify-end",
+    left: "items-start",
+    center: "items-center",
+    right: "items-end",
   }
 
   return (
@@ -630,7 +630,7 @@ function ImageNodeView({
       data-alignment={node.attrs.alignment}
     >
       {hasSrc ? (
-        <figure className={cn("my-4 flex w-full", alignmentClasses[node.attrs.alignment])}>
+        <figure className={cn("my-4 flex w-full flex-col", alignmentClasses[node.attrs.alignment])}>
           <div
             ref={containerRef}
             className={cn(
