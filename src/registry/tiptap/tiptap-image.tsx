@@ -437,8 +437,8 @@ function ResizeHandle({ direction, onResizeStart }: ResizeHandleProps) {
 
 interface ImageBlockProps extends ComponentProps<"img"> {
   selected?: boolean
-  imageWidth?: number | null
-  imageHeight?: number | null
+  imageWidth?: number | string | null
+  imageHeight?: number | string | null
   objectFit?: TiptapImageObjectFit | null
 }
 
@@ -467,8 +467,16 @@ const ImageBlock = forwardRef<HTMLImageElement, ImageBlockProps>(
         style={{
           margin: 0,
           ...style,
-          width: imageWidth ? `${imageWidth}px` : undefined,
-          height: imageHeight ? `${imageHeight}px` : undefined,
+          width: imageWidth
+            ? typeof imageWidth === "string" && imageWidth.includes("%")
+              ? imageWidth
+              : `${imageWidth}px`
+            : undefined,
+          height: imageHeight
+            ? typeof imageHeight === "string" && imageHeight.includes("%")
+              ? imageHeight
+              : `${imageHeight}px`
+            : undefined,
           objectFit: objectFit ?? undefined,
         }}
       />
@@ -487,11 +495,12 @@ interface ImageNodeViewProps {
       src: string | null
       alt: string | null
       title: string | null
-      width: number | null
-      height: number | null
+      width: number | string | null
+      height: number | string | null
       alignment: TiptapImageAlignment
       caption: string | null
       objectFit: TiptapImageObjectFit
+      lockAspectRatio: boolean
     }
   }
   updateAttributes: (attrs: Record<string, unknown>) => void
@@ -564,13 +573,26 @@ function ImageNodeView({
       if (resizeDirection.includes("bottom")) newHeight += deltaY
       if (resizeDirection.includes("top")) newHeight -= deltaY
 
-      // Preserve aspect ratio if Shift is held
-      if (e.shiftKey && initialSize.width > 0 && initialSize.height > 0) {
+      // Preserve aspect ratio if Shift is held OR lockAspectRatio is enabled
+      const shouldLockRatio = e.shiftKey || node.attrs.lockAspectRatio
+      if (shouldLockRatio && initialSize.width > 0 && initialSize.height > 0) {
         const aspectRatio = initialSize.width / initialSize.height
+
+        // Get container max width to prevent overflow
+        const containerMaxWidth = containerRef.current?.parentElement?.clientWidth ?? Infinity
+
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Width is the primary dimension
+          newWidth = Math.min(newWidth, containerMaxWidth)
           newHeight = newWidth / aspectRatio
         } else {
+          // Height is the primary dimension
           newWidth = newHeight * aspectRatio
+          // Constrain to container width if exceeded
+          if (newWidth > containerMaxWidth) {
+            newWidth = containerMaxWidth
+            newHeight = newWidth / aspectRatio
+          }
         }
       }
 
@@ -761,7 +783,9 @@ export const TiptapImageExtension = Node.create<TiptapImageOptions>({
         default: null,
         parseHTML: (el) => {
           const width = (el as HTMLImageElement).getAttribute("width")
-          return width ? parseInt(width, 10) : null
+          if (!width) return null
+          // Preserve percentage values as strings, parse numbers as integers
+          return width.includes("%") ? width : parseInt(width, 10)
         },
         renderHTML: (attrs) => (attrs.width ? { width: attrs.width } : {}),
       },
@@ -769,7 +793,9 @@ export const TiptapImageExtension = Node.create<TiptapImageOptions>({
         default: null,
         parseHTML: (el) => {
           const height = (el as HTMLImageElement).getAttribute("height")
-          return height ? parseInt(height, 10) : null
+          if (!height) return null
+          // Preserve percentage values as strings, parse numbers as integers
+          return height.includes("%") ? height : parseInt(height, 10)
         },
         renderHTML: (attrs) => (attrs.height ? { height: attrs.height } : {}),
       },
@@ -790,6 +816,12 @@ export const TiptapImageExtension = Node.create<TiptapImageOptions>({
         parseHTML: (el) =>
           (el as HTMLElement).getAttribute("data-object-fit") ?? "contain",
         renderHTML: (attrs) => ({ "data-object-fit": attrs.objectFit }),
+      },
+      lockAspectRatio: {
+        default: true,
+        parseHTML: (el) =>
+          (el as HTMLElement).getAttribute("data-lock-aspect-ratio") !== "false",
+        renderHTML: (attrs) => ({ "data-lock-aspect-ratio": String(attrs.lockAspectRatio) }),
       },
     }
   },
@@ -840,7 +872,6 @@ export const ImageBubbleMenu = () => {
   const { editor } = useContext(TipTapContext)
   const [captionOpen, setCaptionOpen] = useState(false)
   const [captionValue, setCaptionValue] = useState("")
-  const [isConstrained, setIsConstrained] = useState(true)
   const widthInputRef = useRef<HTMLInputElement>(null)
   const heightInputRef = useRef<HTMLInputElement>(null)
 
@@ -887,54 +918,100 @@ export const ImageBubbleMenu = () => {
     return editor.getAttributes("image") as {
       src: string | null
       alt: string | null
-      width: number | null
-      height: number | null
+      width: number | string | null
+      height: number | string | null
       alignment: TiptapImageAlignment
       caption: string | null
       objectFit: TiptapImageObjectFit
+      lockAspectRatio: boolean
     }
+  }
+
+  const attrs = getImageAttrs()
+  const isConstrained = attrs?.lockAspectRatio ?? true
+
+  const handleToggleLockAspectRatio = () => {
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("image", { lockAspectRatio: !isConstrained })
+      .run()
+  }
+
+  const parseValue = (value: string): { numericValue: number; isPercentage: boolean } | null => {
+    const trimmed = value.trim()
+    if (!trimmed) return null
+
+    const isPercentage = trimmed.endsWith("%")
+    const numStr = isPercentage ? trimmed.slice(0, -1) : trimmed
+    const numValue = parseFloat(numStr)
+
+    if (isNaN(numValue) || numValue <= 0) return null
+    if (isPercentage && numValue > 100) return null
+
+    return { numericValue: numValue, isPercentage }
+  }
+
+  const formatValue = (numericValue: number, isPercentage: boolean): string | number => {
+    return isPercentage ? `${numericValue}%` : Math.round(numericValue)
   }
 
   const applyWidth = (value: string) => {
-    const numValue = parseInt(value, 10)
-    if (!isNaN(numValue) && numValue > 0) {
-      if (isConstrained && defaultDimensions.width && defaultDimensions.height) {
-        const aspectRatio = parseInt(defaultDimensions.height, 10) / parseInt(defaultDimensions.width, 10)
-        const newHeight = Math.round(numValue * aspectRatio)
+    const parsed = parseValue(value)
+    if (!parsed) return
+
+    const { numericValue, isPercentage } = parsed
+    const formattedValue = formatValue(numericValue, isPercentage)
+
+    if (isConstrained && defaultDimensions.width && defaultDimensions.height && !isPercentage) {
+      const currentWidth = parseFloat(defaultDimensions.width)
+      const currentHeight = parseFloat(defaultDimensions.height)
+      if (currentWidth > 0 && currentHeight > 0) {
+        const aspectRatio = currentHeight / currentWidth
+        const newHeight = Math.round(numericValue * aspectRatio)
         editor
           .chain()
           .focus()
-          .updateAttributes("image", { width: numValue, height: newHeight })
+          .updateAttributes("image", { width: formattedValue, height: newHeight })
           .run()
-      } else {
-        editor
-          .chain()
-          .focus()
-          .updateAttributes("image", { width: numValue })
-          .run()
+        return
       }
     }
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("image", { width: formattedValue })
+      .run()
   }
 
   const applyHeight = (value: string) => {
-    const numValue = parseInt(value, 10)
-    if (!isNaN(numValue) && numValue > 0) {
-      if (isConstrained && defaultDimensions.width && defaultDimensions.height) {
-        const aspectRatio = parseInt(defaultDimensions.width, 10) / parseInt(defaultDimensions.height, 10)
-        const newWidth = Math.round(numValue * aspectRatio)
+    const parsed = parseValue(value)
+    if (!parsed) return
+
+    const { numericValue, isPercentage } = parsed
+    const formattedValue = formatValue(numericValue, isPercentage)
+
+    if (isConstrained && defaultDimensions.width && defaultDimensions.height && !isPercentage) {
+      const currentWidth = parseFloat(defaultDimensions.width)
+      const currentHeight = parseFloat(defaultDimensions.height)
+      if (currentWidth > 0 && currentHeight > 0) {
+        const aspectRatio = currentWidth / currentHeight
+        const newWidth = Math.round(numericValue * aspectRatio)
         editor
           .chain()
           .focus()
-          .updateAttributes("image", { width: newWidth, height: numValue })
+          .updateAttributes("image", { width: newWidth, height: formattedValue })
           .run()
-      } else {
-        editor
-          .chain()
-          .focus()
-          .updateAttributes("image", { height: numValue })
-          .run()
+        return
       }
     }
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("image", { height: formattedValue })
+      .run()
   }
 
   const handleWidthBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -986,8 +1063,6 @@ export const ImageBubbleMenu = () => {
     editor.chain().focus().deleteSelection().run()
   }
 
-  const attrs = getImageAttrs()
-
   return (
     <BubbleMenu
       editor={editor}
@@ -1005,19 +1080,18 @@ export const ImageBubbleMenu = () => {
           <Input
             ref={widthInputRef}
             key={`width-${defaultDimensions.width}-${isConstrained}`}
-            type="number"
+            type="text"
             placeholder="W"
             defaultValue={defaultDimensions.width}
             onBlur={handleWidthBlur}
             onKeyDown={handleWidthKeyDown}
-            className="appearance-[textfield-number-spin-button] h-7 w-16 text-xs [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            min={50}
+            className="h-7 w-16 text-xs"
           />
           <Button
             variant={isConstrained ? "secondary" : "ghost"}
             size="sm"
             className="h-7 w-7 p-0"
-            onClick={() => setIsConstrained(!isConstrained)}
+            onClick={handleToggleLockAspectRatio}
             title={isConstrained ? "Unlock aspect ratio" : "Lock aspect ratio"}
           >
             {isConstrained ? (
@@ -1029,13 +1103,12 @@ export const ImageBubbleMenu = () => {
           <Input
             ref={heightInputRef}
             key={`height-${defaultDimensions.height}-${isConstrained}`}
-            type="number"
+            type="text"
             placeholder="H"
             defaultValue={defaultDimensions.height}
             onBlur={handleHeightBlur}
             onKeyDown={handleHeightKeyDown}
-            className="appearance-[textfield-number-spin-button] h-7 w-16 text-xs [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            min={50}
+            className="h-7 w-16 text-xs"
           />
         </div>
 
