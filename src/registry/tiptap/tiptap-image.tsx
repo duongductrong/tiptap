@@ -1070,6 +1070,47 @@ export const ImageBubbleMenu = () => {
         duration: 100,
         placement: "bottom",
         offset: [0, 8],
+        getReferenceClientRect: () => {
+          const { state, view } = editor
+          const { selection } = state
+
+          // Try to find the image node from the current selection
+          const { node } = selection as any
+          if (node?.type?.name === "image" && node.attrs.src) {
+            // Find the specific image element in the DOM
+            const imageElement = view.dom.querySelector(
+              `[data-type="image"][data-src="${node.attrs.src}"] img`
+            ) as HTMLImageElement | null
+
+            if (imageElement) {
+              return imageElement.getBoundingClientRect()
+            }
+          }
+
+          // Fallback: find any focused/selected image wrapper
+          const selectedImageWrapper = view.dom.querySelector(
+            '[data-type="image"] .ring-primary'
+          )?.closest('[data-type="image"]') as HTMLElement | null
+
+          if (selectedImageWrapper) {
+            const img = selectedImageWrapper.querySelector('img')
+            if (img) {
+              return img.getBoundingClientRect()
+            }
+          }
+
+          // Final fallback: use the selection coordinates
+          const { from, to } = selection
+          const start = view.coordsAtPos(from)
+          const end = view.coordsAtPos(to)
+
+          return new DOMRect(
+            start.left,
+            start.top,
+            end.right - start.left,
+            end.bottom - start.top
+          )
+        },
       }}
       shouldShow={({ editor }) => editor.isActive("image")}
       className="w-fit"
