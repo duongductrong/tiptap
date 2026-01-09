@@ -45,34 +45,6 @@
 npx shadcn@latest add https://tiptap-seven.vercel.app/schema/tiptap.json
 ```
 
-## Quick Start
-
-```tsx
-import { TiptapEditor, TiptapContent, TiptapToolbar } from "@/components/ui/tiptap"
-
-export default function MyEditor() {
-  return (
-    <TiptapEditor content="<p>Hello World!</p>">
-      <TiptapToolbar />
-      <TiptapContent />
-    </TiptapEditor>
-  )
-}
-```
-
-## Extensions Included
-
-| Extension | Description |
-|-----------|-------------|
-| **StarterKit** | Core nodes (Document, Paragraph, Text, Heading, etc.) and marks (Bold, Italic, Strike, Code) |
-| **Underline** | Underline text formatting |
-| **TextAlign** | Text alignment (left, center, right, justify) |
-| **Typography** | Automatic typographic improvements |
-| **CodeBlockLowlight** | Code blocks with syntax highlighting |
-| **Image** | Image insertion with validation options |
-| **Table** | Tables with resizable columns and headers |
-| **SlashMenu** | Notion-style slash commands |
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
