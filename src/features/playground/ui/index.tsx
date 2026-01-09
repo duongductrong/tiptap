@@ -1,83 +1,111 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Blocks, ArrowLeft } from "lucide-react"
+import { FileText, Layers, Sparkles, Eye, ArrowLeft } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import EditorPlayground, { EditorMode } from "../components/editor-playground"
+import {
+  MinimalEditor,
+  FullFeaturedEditor,
+  CustomExtensionEditor,
+  ReadOnlyViewerDemo,
+} from "../components"
+
+type ExampleTab = "minimal" | "full" | "custom" | "readonly"
 
 const PlaygroundPage = () => {
-  const [mode, setMode] = useState<EditorMode>("essential")
+  const [tab, setTab] = useState<ExampleTab>("full")
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container max-w-5xl mx-auto px-4 py-8 md:py-12">
+    <div className="flex min-h-screen flex-col">
+      <main className="container mx-auto max-w-5xl flex-1 px-4 py-8 md:py-12">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="mb-8 flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/">
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
           <div className="mx-auto text-center">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               Editor Playground
             </h1>
             <p className="text-muted-foreground mt-1">
-              Explore the full capabilities of the Tiptap editor
+              Explore different ways to use the modular Tiptap editor
             </p>
           </div>
         </div>
 
-        {/* Mode Tabs */}
+        {/* Example Tabs */}
         <Tabs
-          value={mode}
-          onValueChange={(value) => setMode(value as EditorMode)}
+          value={tab}
+          onValueChange={(value) => setTab(value as ExampleTab)}
           className="w-full"
         >
           <div className="flex justify-center">
-            <TabsList className="mb-6">
-              <TabsTrigger value="essential" className="gap-2">
+            <TabsList className="mb-6 h-auto flex-wrap gap-1">
+              <TabsTrigger value="minimal" className="gap-2">
                 <FileText className="size-4" />
-                Essential / Document
+                Minimal
               </TabsTrigger>
-              <TabsTrigger value="notion" className="gap-2">
-                <Blocks className="size-4" />
-                Notion Block Style
+              <TabsTrigger value="full" className="gap-2">
+                <Layers className="size-4" />
+                Full-Featured
+              </TabsTrigger>
+              <TabsTrigger value="custom" className="gap-2">
+                <Sparkles className="size-4" />
+                Custom Extensions
+              </TabsTrigger>
+              <TabsTrigger value="readonly" className="gap-2">
+                <Eye className="size-4" />
+                Read-Only
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="essential" className="mt-0">
-            <EditorPlayground mode="essential" />
+          {/* Minimal Editor */}
+          <TabsContent value="minimal" className="mt-0">
+            <MinimalEditor />
           </TabsContent>
 
-          <TabsContent value="notion" className="mt-0">
-            <EditorPlayground mode="notion" />
+          {/* Full-Featured Editor */}
+          <TabsContent value="full" className="mt-0">
+            <FullFeaturedEditor />
+          </TabsContent>
+
+          {/* Custom Extension Editor */}
+          <TabsContent value="custom" className="mt-0">
+            <CustomExtensionEditor />
+          </TabsContent>
+
+          {/* Read-Only Viewer */}
+          <TabsContent value="readonly" className="mt-0">
+            <ReadOnlyViewerDemo />
           </TabsContent>
         </Tabs>
 
         {/* Tips Section */}
-        <div className="mt-8 p-4">
-          <h3 className="font-medium mb-2">💡 Quick Tips</h3>
-          <ul className="text-sm text-muted-foreground space-y-1">
+        <div className="bg-muted/30 mt-8 rounded-lg border p-4">
+          <h3 className="mb-2 font-medium">💡 Quick Tips</h3>
+          <ul className="text-muted-foreground space-y-1 text-sm">
             <li>
-              • Type <code className="px-1 py-0.5 rounded bg-muted">/</code> to
-              open the slash command menu
+              • Type <code className="bg-muted rounded px-1 py-0.5">/</code> to
+              open the slash command menu (Full-Featured & Custom)
             </li>
-            <li>• Select text to reveal the formatting toolbar</li>
+            <li>• Select text to reveal the formatting bubble menu</li>
             <li>
-              • Use keyboard shortcuts:{" "}
-              <kbd className="px-1 py-0.5 rounded bg-muted text-xs">
+              • Use{" "}
+              <kbd className="bg-muted rounded px-1 py-0.5 text-xs">
                 Cmd/Ctrl + B
               </kbd>{" "}
               for bold,{" "}
-              <kbd className="px-1 py-0.5 rounded bg-muted text-xs">
+              <kbd className="bg-muted rounded px-1 py-0.5 text-xs">
                 Cmd/Ctrl + I
               </kbd>{" "}
               for italic
             </li>
+            <li>• Each example uses the same modular registry components</li>
           </ul>
         </div>
       </main>

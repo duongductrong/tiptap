@@ -1,40 +1,159 @@
 {
-    "$schema": "https://ui.shadcn.com/schema/registry.json",
-    "name": "tiptap-registry",
-    "homepage": "https://yourdomain.com",
-    "items": [
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "tiptap-registry",
+  "homepage": "https://yourdomain.com",
+  "items": [
+    {
+      "name": "editor",
+      "type": "registry:ui",
+      "title": "Editor",
+      "description": "Core rich text editor with basic formatting, text/link bubble menus, and toolbar components.",
+      "dependencies": [
+        "@tiptap/core",
+        "@tiptap/react",
+        "@tiptap/starter-kit",
+        "@tiptap/extension-text-align",
+        "@tiptap/extension-typography",
+        "@tiptap/extension-underline",
+        "@tiptap/extension-highlight",
+        "@tiptap/extension-link",
+        "@tiptap/extension-task-list",
+        "@tiptap/extension-task-item",
+        "@tiptap/extension-placeholder",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "button",
+        "dropdown-menu",
+        "scroll-area",
+        "input",
+        "popover"
+      ],
+      "files": [
         {
-            "name": "tiptap",
-            "type": "registry:block",
-            "title": "Tiptap Editor",
-            "description": "A fully-featured rich text editor built with Tiptap, including toolbar, bubble menu, floating menu, and image support.",
-            "dependencies": [
-                "@tiptap/core",
-                "@tiptap/react",
-                "@tiptap/starter-kit",
-                "@tiptap/extension-text-align",
-                "@tiptap/extension-typography",
-                "@tiptap/extension-underline",
-                "@tiptap/extension-code-block-lowlight",
-                "@tiptap/extension-table",
-                "@tiptap/suggestion",
-                "lowlight",
-                "lucide-react",
-                "tippy.js"
-            ],
-            "registryDependencies": [
-                "button",
-                "dropdown-menu",
-                "scroll-area",
-                "dialog",
-                "input"
-            ],
-            "files": [
-                {
-                    "path": "src/registry/tiptap/tiptap.tsx",
-                    "type": "registry:ui"
-                }
-            ]
+          "path": "src/registry/editor/editor.tsx",
+          "type": "registry:ui"
         }
-    ]
+      ]
+    },
+    {
+      "name": "editor-image",
+      "type": "registry:ui",
+      "title": "Editor Image Extension",
+      "description": "Image extension with upload, resize, alignment, captions, and bubble menu.",
+      "dependencies": [],
+      "registryDependencies": ["editor", "tabs"],
+      "files": [
+        {
+          "path": "src/registry/editor/editor-image.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "editor-table",
+      "type": "registry:ui",
+      "title": "Editor Table Extension",
+      "description": "Table extension with resizable columns, cell controls, and bubble menu.",
+      "dependencies": [
+        "@tiptap/extension-table",
+        "@tiptap/extension-table-row",
+        "@tiptap/extension-table-header",
+        "@tiptap/extension-table-cell"
+      ],
+      "registryDependencies": ["editor"],
+      "files": [
+        {
+          "path": "src/registry/editor/editor-table.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "editor-code-block",
+      "type": "registry:ui",
+      "title": "Editor CodeBlock Extension",
+      "description": "Code block with syntax highlighting, language selector, and copy button.",
+      "dependencies": ["@tiptap/extension-code-block-lowlight", "lowlight"],
+      "registryDependencies": ["editor"],
+      "files": [
+        {
+          "path": "src/registry/editor/editor-code-block.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "editor-slash-menu",
+      "type": "registry:ui",
+      "title": "Editor Slash Menu Extension",
+      "description": "Notion-style slash command menu with keyboard navigation.",
+      "dependencies": ["@tiptap/suggestion", "tippy.js"],
+      "registryDependencies": ["editor"],
+      "files": [
+        {
+          "path": "src/registry/editor/editor-slash-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "editor-full",
+      "type": "registry:block",
+      "title": "Editor (Full)",
+      "description": "Complete rich text editor with all extensions: image, table, code block, and slash menu.",
+      "dependencies": [
+        "@tiptap/core",
+        "@tiptap/react",
+        "@tiptap/starter-kit",
+        "@tiptap/extension-text-align",
+        "@tiptap/extension-typography",
+        "@tiptap/extension-underline",
+        "@tiptap/extension-highlight",
+        "@tiptap/extension-link",
+        "@tiptap/extension-task-list",
+        "@tiptap/extension-task-item",
+        "@tiptap/extension-placeholder",
+        "@tiptap/extension-table",
+        "@tiptap/extension-table-row",
+        "@tiptap/extension-table-header",
+        "@tiptap/extension-table-cell",
+        "@tiptap/extension-code-block-lowlight",
+        "@tiptap/suggestion",
+        "lowlight",
+        "lucide-react",
+        "tippy.js"
+      ],
+      "registryDependencies": [
+        "button",
+        "dropdown-menu",
+        "scroll-area",
+        "input",
+        "popover",
+        "tabs"
+      ],
+      "files": [
+        {
+          "path": "src/registry/editor/editor.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/registry/editor/editor-image.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/registry/editor/editor-table.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/registry/editor/editor-code-block.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/registry/editor/editor-slash-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
 }
