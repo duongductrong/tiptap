@@ -552,13 +552,13 @@ const extensions = [
 
   /**
    * @description Allow to format text as code block with syntax highlighting, lowlight
-   * @reference @/registry/tiptap/extensions/code-block.tsx
+   * @reference @/registry/editor/extensions/code-block.tsx
    */
   CodeBlock.configure({}),
 
   /**
    * @description Inline image block with upload UI
-   * @reference @/registry/tiptap/tiptap-image.tsx
+   * @reference @/registry/editor/tiptap-image.tsx
    */
   TiptapImageExtension.configure({}),
 
@@ -881,12 +881,12 @@ const tiptapActions = {
   codeBlock: "codeBlock",
   // @tiptap/extension-underline
   underline: "underline",
-  // @/registry/tiptap/extensions/text-align.tsx
+  // @/registry/editor/extensions/text-align.tsx
   left: "left",
   center: "center",
   right: "right",
   justify: "justify",
-  // @/registry/tiptap/extensions/image.tsx
+  // @/registry/editor/extensions/image.tsx
   image: "image",
   // @tiptap/extension-table
   insertTable: "insertTable",
@@ -1586,7 +1586,7 @@ export const TiptapDropdown = ({
   )
 }
 
-export interface TiptapToolbarProps extends ComponentProps<"div"> { }
+export interface TiptapToolbarProps extends ComponentProps<"div"> {}
 
 export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
   <div
@@ -1598,7 +1598,7 @@ export const TiptapToolbar = ({ className, ...props }: TiptapToolbarProps) => (
 export interface TiptapContentProps extends Omit<
   ComponentProps<typeof EditorContent>,
   "editor"
-> { }
+> {}
 
 export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
   const { editor } = useContext(TipTapContext)
@@ -1693,7 +1693,7 @@ export const TiptapContent = ({ className, ...props }: TiptapContentProps) => {
 export interface TipTapFloatingMenuProps extends Omit<
   ComponentProps<typeof FloatingMenu>,
   "editor"
-> { }
+> {}
 
 export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
   const { editor } = useContext(TipTapContext)
@@ -1728,7 +1728,7 @@ export const TipTapFloatingMenu = (props: TipTapFloatingMenuProps) => {
 export interface TipTapBubbleMenuProps extends Omit<
   ComponentProps<typeof BubbleMenu>,
   "editor" | "children"
-> { }
+> {}
 
 export const TipTapBubbleMenu = (props: TipTapBubbleMenuProps) => {
   const { editor } = useContext(TipTapContext)

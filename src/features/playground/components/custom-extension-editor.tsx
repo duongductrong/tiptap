@@ -23,13 +23,13 @@ import {
   EditorBubbleMenuText,
   EditorContext,
   EDITOR_ACTIONS,
-} from "@/registry/tiptap/editor"
+} from "@/registry/editor/editor"
 
 import {
   EditorSlashMenuExtension,
   defaultSlashMenuItems,
   type SlashMenuItem,
-} from "@/registry/tiptap/editor-slash-menu"
+} from "@/registry/editor/editor-slash-menu"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

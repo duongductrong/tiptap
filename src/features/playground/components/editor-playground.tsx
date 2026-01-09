@@ -4,7 +4,7 @@ import {
   TiptapBubbleMenu,
   TiptapContent,
   TiptapEditor,
-} from "@/registry/tiptap/tiptap"
+} from "@/registry/editor/tiptap"
 import { cn } from "@/lib/utils"
 
 export type EditorMode = "essential" | "notion"
@@ -142,7 +142,7 @@ const EditorPlayground = ({ mode, className }: EditorPlaygroundProps) => {
           className={cn(
             "prose dark:prose-invert max-w-full p-6 md:p-8",
             "min-h-[500px] md:min-h-[600px]",
-            "[&_.tiptap]:outline-none [&_.tiptap]:min-h-full"
+            "[&_.tiptap]:min-h-full [&_.tiptap]:outline-none"
           )}
         />
         <TiptapBubbleMenu />

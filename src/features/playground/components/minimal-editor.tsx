@@ -18,7 +18,7 @@ import {
   EditorContent,
   EditorProvider,
   EditorToolbar,
-} from "@/registry/tiptap/editor"
+} from "@/registry/editor/editor"
 
 import { Bold, Italic, Strikethrough, Underline } from "lucide-react"
 

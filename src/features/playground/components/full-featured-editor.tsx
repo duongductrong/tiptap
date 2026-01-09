@@ -25,29 +25,29 @@ import {
   EditorSeparator,
   EditorToolbar,
   useEditor,
-} from "@/registry/tiptap/editor"
+} from "@/registry/editor/editor"
 
 import {
   EditorBubbleMenuImage,
   EditorImageExtension,
-} from "@/registry/tiptap/editor-image"
+} from "@/registry/editor/editor-image"
 
 import {
   EditorBubbleMenuTable,
   EditorTableExtensions,
-} from "@/registry/tiptap/editor-table"
+} from "@/registry/editor/editor-table"
 
 import {
   EditorBubbleMenuCodeBlock,
   EditorCodeBlockExtension,
-} from "@/registry/tiptap/editor-code-block"
+} from "@/registry/editor/editor-code-block"
 
-import { EditorSlashMenuExtension } from "@/registry/tiptap/editor-slash-menu"
+import { EditorSlashMenuExtension } from "@/registry/editor/editor-slash-menu"
 
-import { EditorHighlightExtension } from "@/registry/tiptap/editor-highlight"
-import { EditorLinkExtension } from "@/registry/tiptap/editor-link"
-import { EditorPlaceholderExtension } from "@/registry/tiptap/editor-placeholder"
-import { EditorTaskListExtensions } from "@/registry/tiptap/editor-task-list"
+import { EditorHighlightExtension } from "@/registry/editor/editor-highlight"
+import { EditorLinkExtension } from "@/registry/editor/editor-link"
+import { EditorPlaceholderExtension } from "@/registry/editor/editor-placeholder"
+import { EditorTaskListExtensions } from "@/registry/editor/editor-task-list"
 import {
   Bold,
   CheckSquare,

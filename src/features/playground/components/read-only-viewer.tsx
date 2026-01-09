@@ -11,23 +11,16 @@
  * Use this for displaying user-generated content.
  */
 
-import {
-  EditorProvider,
-  EditorContent,
-} from "@/registry/tiptap/editor"
+import { EditorProvider, EditorContent } from "@/registry/editor/editor"
 
-import {
-  EditorImageExtension,
-} from "@/registry/tiptap/editor-image"
+import { EditorImageExtension } from "@/registry/editor/editor-image"
 
-import {
-  EditorTableExtensions,
-} from "@/registry/tiptap/editor-table"
+import { EditorTableExtensions } from "@/registry/editor/editor-table"
 
 import {
   EditorCodeBlockExtension,
   CODEBLOCK_STYLES,
-} from "@/registry/tiptap/editor-code-block"
+} from "@/registry/editor/editor-code-block"
 
 interface ReadOnlyViewerProps {
   content: string
@@ -47,7 +40,9 @@ export function ReadOnlyViewer({ content, className }: ReadOnlyViewerProps) {
     >
       <style>{CODEBLOCK_STYLES}</style>
       <EditorContent
-        className={className ?? "prose prose-sm dark:prose-invert max-w-none p-4"}
+        className={
+          className ?? "prose prose-sm dark:prose-invert max-w-none p-4"
+        }
       />
       {/* No bubble menus or toolbars needed for read-only mode */}
     </EditorProvider>

@@ -4,7 +4,7 @@ import {
   TiptapBubbleMenu,
   TiptapContent,
   TiptapEditor,
-} from "@/registry/tiptap/tiptap"
+} from "@/registry/editor/tiptap"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
 
@@ -76,7 +76,12 @@ interface EditorCardProps {
   delay?: number
 }
 
-const EditorCard = ({ content, className, size = "default", delay = 0 }: EditorCardProps) => {
+const EditorCard = ({
+  content,
+  className,
+  size = "default",
+  delay = 0,
+}: EditorCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -84,8 +89,8 @@ const EditorCard = ({ content, className, size = "default", delay = 0 }: EditorC
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
       className={cn(
-        "relative rounded-xl border border-border bg-card overflow-hidden",
-        "ring-1 ring-border/50",
+        "border-border bg-card relative overflow-hidden rounded-xl border",
+        "ring-border/50 ring-1",
         size === "large" && "row-span-2",
         className
       )}
@@ -95,7 +100,7 @@ const EditorCard = ({ content, className, size = "default", delay = 0 }: EditorC
           className={cn(
             "prose dark:prose-invert max-w-full p-4",
             size === "large" ? "min-h-[400px]" : "min-h-[200px]",
-            "[&_.tiptap]:outline-none [&_.tiptap]:min-h-full"
+            "[&_.tiptap]:min-h-full [&_.tiptap]:outline-none"
           )}
         />
         <TiptapBubbleMenu />
@@ -104,31 +109,21 @@ const EditorCard = ({ content, className, size = "default", delay = 0 }: EditorC
   )
 }
 
-export interface PartialEditorProps { }
+export interface PartialEditorProps {}
 
 const PartialEditor = () => {
   return (
-    <div className="max-w-6xl mx-auto px-4 pb-16 md:pb-24">
+    <div className="mx-auto max-w-6xl px-4 pb-16 md:pb-24">
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         {/* Main Editor - Large Card */}
-        <EditorCard
-          content={MAIN_EDITOR_CONTENT}
-          size="large"
-          delay={0}
-        />
+        <EditorCard content={MAIN_EDITOR_CONTENT} size="large" delay={0} />
 
         {/* Code Block Preview */}
-        <EditorCard
-          content={CODE_BLOCK_CONTENT}
-          delay={0.1}
-        />
+        <EditorCard content={CODE_BLOCK_CONTENT} delay={0.1} />
 
         {/* Table Preview */}
-        <EditorCard
-          content={TABLE_CONTENT}
-          delay={0.2}
-        />
+        <EditorCard content={TABLE_CONTENT} delay={0.2} />
 
         {/* Lists Preview - spans 2 columns on md+ */}
         <EditorCard
