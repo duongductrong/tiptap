@@ -203,7 +203,7 @@ export function EditorImagePlaceholder({
     <EditorImageContext.Provider value={contextValue}>
       <div className="border-border bg-muted/30 my-4 rounded-lg border">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="ml-2 mt-2">
+          <TabsList className="mt-2 ml-2">
             <TabsTrigger value="upload">
               <Upload className="mr-2 size-4" />
               Upload
@@ -487,7 +487,7 @@ EditorImageBlock.displayName = "EditorImageBlock"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ImageNodeView(props: any) {
-  const { node, updateAttributes, selected, extension } = props
+  const { node, updateAttributes, selected, extension, editor, getPos } = props
 
   const nodeAttrs = node.attrs as {
     src: string | null
@@ -515,9 +515,20 @@ function ImageNodeView(props: any) {
     height: number
   } | null>(null)
 
-  const handleImageReady = (src: string, alt?: string) => {
-    updateAttributes({ src, alt: alt ?? nodeAttrs.alt })
-  }
+  const handleImageReady = React.useCallback(
+    (src: string, alt?: string) => {
+      updateAttributes({ src, alt: alt ?? nodeAttrs.alt })
+
+      requestAnimationFrame(() => {
+        const pos = getPos?.()
+        if (typeof pos === "number" && editor) {
+          editor.commands.setNodeSelection(pos)
+          editor.commands.focus()
+        }
+      })
+    },
+    [updateAttributes, nodeAttrs.alt, getPos, editor]
+  )
 
   const handleResizeStart = React.useCallback(
     (e: React.MouseEvent, direction: ResizeDirection) => {
@@ -813,10 +824,7 @@ export const EditorImageExtension = Node.create<EditorImageOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return [
-      "img",
-      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
-    ]
+    return ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]
   },
 
   addNodeView() {
@@ -891,7 +899,9 @@ export function EditorBubbleMenuImage() {
       }
     }
 
-    const { node } = editor.state.selection as { node?: { type?: { name?: string }, attrs?: { src?: string } } }
+    const { node } = editor.state.selection as {
+      node?: { type?: { name?: string }; attrs?: { src?: string } }
+    }
     if (node?.type?.name === "image" && node.attrs?.src) {
       const imageElement = editor.view.dom.querySelector(
         `img[src="${node.attrs.src}"]`
@@ -907,7 +917,7 @@ export function EditorBubbleMenuImage() {
     }
 
     return { width: "", height: "" }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, isImageActive, forceUpdate])
 
   const defaultDimensions = getDefaultDimensions()
@@ -1096,7 +1106,9 @@ export function EditorBubbleMenuImage() {
           const { state, view } = editor
           const { selection } = state
 
-          const { node } = selection as { node?: { type?: { name?: string }, attrs?: { src?: string } } }
+          const { node } = selection as {
+            node?: { type?: { name?: string }; attrs?: { src?: string } }
+          }
           if (node?.type?.name === "image" && node.attrs?.src) {
             const imageElement = view.dom.querySelector(
               `[data-type="image"][data-src="${node.attrs.src}"] img`
@@ -1107,9 +1119,9 @@ export function EditorBubbleMenuImage() {
             }
           }
 
-          const selectedImageWrapper = view.dom.querySelector(
-            '[data-type="image"] .ring-primary'
-          )?.closest('[data-type="image"]') as HTMLElement | null
+          const selectedImageWrapper = view.dom
+            .querySelector('[data-type="image"] .ring-primary')
+            ?.closest('[data-type="image"]') as HTMLElement | null
 
           if (selectedImageWrapper) {
             const img = selectedImageWrapper.querySelector("img")
@@ -1209,7 +1221,11 @@ export function EditorBubbleMenuImage() {
         {/* Object Fit Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 px-2 text-xs"
+            >
               {OBJECT_FIT_OPTIONS.find((o) => o.value === attrs?.objectFit)
                 ?.label || "Contain"}
               <ChevronDown className="size-3 opacity-50" />
