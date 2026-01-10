@@ -887,6 +887,18 @@ const EditorButton = React.forwardRef<HTMLButtonElement, EditorButtonProps>(
     ref
   ) => {
     const { editor } = useEditor()
+    const [, forceUpdate] = React.useReducer((x) => x + 1, 0)
+
+    React.useEffect(() => {
+      if (!editor) return
+
+      const handleUpdate = () => forceUpdate()
+      editor.on("transaction", handleUpdate)
+
+      return () => {
+        editor.off("transaction", handleUpdate)
+      }
+    }, [editor])
 
     const isActive = React.useMemo(() => {
       if (!editor) return false
@@ -896,10 +908,7 @@ const EditorButton = React.forwardRef<HTMLButtonElement, EditorButtonProps>(
       return editor.isActive(action)
     }, [editor, action])
 
-    const canUse = React.useMemo(
-      () => canUseEditorAction(editor, action),
-      [editor, action]
-    )
+    const canUse = canUseEditorAction(editor, action)
 
     const handleClick = () => {
       executeEditorAction(editor, action)
