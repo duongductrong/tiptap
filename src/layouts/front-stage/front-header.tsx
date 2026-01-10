@@ -18,18 +18,18 @@ const SwitchThemeButton = dynamic(
   }
 )
 
-export interface FrontHeaderProps { }
+export interface FrontHeaderProps {}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FrontHeader = (props: FrontHeaderProps) => {
   return (
-    <header className="z-50 w-full bg-background sticky top-0">
-      <div className="max-w-6xl mx-auto flex h-14 items-center justify-between px-4">
+    <header className="bg-background sticky top-0 z-50 w-full">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <div className="size-6 rounded-md bg-foreground flex items-center justify-center">
+          <div className="bg-foreground flex size-6 items-center justify-center rounded-md">
             <span className="text-background text-xs font-bold">T</span>
           </div>
-          <span className="hidden sm:inline-block">tiptap</span>
+          <span className="hidden sm:inline-block">Editor</span>
         </Link>
 
         <div className="flex items-center gap-2">

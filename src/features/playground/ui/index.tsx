@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, FileText, Layers, Sparkles } from "lucide-react"
+import { Eye, Layers, Sparkles } from "lucide-react"
 import { useState } from "react"
 import {
   CustomExtensionEditor,

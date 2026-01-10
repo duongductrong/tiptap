@@ -7,7 +7,7 @@ import { ArrowRight, Copy, Check } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
 
-export interface PartialIntroductionProps { }
+export interface IntroductionProps {}
 
 const variants: Variants = {
   hidden: {},
@@ -29,9 +29,10 @@ const itemVariants: Variants = {
   },
 }
 
-const INSTALL_COMMAND = "npx shadcn@latest add https://tiptap-seven.vercel.app/schema/tiptap.json"
+const INSTALL_COMMAND =
+  "npx shadcn@latest add https://tiptap-seven.vercel.app/schema/editor.json"
 
-const PartialIntroduction = () => {
+const Introduction = () => {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -42,7 +43,7 @@ const PartialIntroduction = () => {
 
   return (
     <motion.div
-      className="flex flex-col py-16 md:py-24 items-center text-center"
+      className="flex flex-col items-center py-16 text-center md:py-24"
       variants={variants}
       initial="hidden"
       whileInView="visible"
@@ -53,7 +54,7 @@ const PartialIntroduction = () => {
       {/* Main Headline */}
       <motion.h1
         variants={itemVariants}
-        className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground"
+        className="text-foreground text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
       >
         Beautiful editors, made simple.
       </motion.h1>
@@ -61,7 +62,7 @@ const PartialIntroduction = () => {
       {/* Description */}
       <motion.p
         variants={itemVariants}
-        className="mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed"
+        className="text-muted-foreground mt-6 max-w-2xl text-base leading-relaxed sm:text-lg"
       >
         Beautiful, ready to use, and customizable editor components built on
         Tiptap. Styled with shadcn/ui. Zero config. One command setup.
@@ -70,14 +71,14 @@ const PartialIntroduction = () => {
       {/* Install Command */}
       <motion.div
         variants={itemVariants}
-        className="mt-8 flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-4 py-2.5 font-mono text-sm"
+        className="bg-muted/50 border-border mt-8 flex items-center gap-2 rounded-lg border px-4 py-2.5 font-mono text-sm"
       >
         <span className="text-muted-foreground">$</span>
         <code className="text-foreground">{INSTALL_COMMAND}</code>
         <button
           onClick={handleCopy}
           className={cn(
-            "ml-2 p-1.5 rounded-md transition-colors",
+            "ml-2 rounded-md p-1.5 transition-colors",
             "hover:bg-accent text-muted-foreground hover:text-foreground"
           )}
           aria-label="Copy command"
@@ -103,4 +104,4 @@ const PartialIntroduction = () => {
   )
 }
 
-export default PartialIntroduction
+export default Introduction

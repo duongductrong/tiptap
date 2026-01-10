@@ -1,19 +1,16 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Github } from "lucide-react"
-import Link from "next/link"
-import PartialEditor from "../components/partial-editor"
-import PartialIntroduction from "../components/partial-introduction"
+import EditorDemo from "../components/editor-demo"
+import Introduction from "../components/introduction"
 
-export interface HomeProps { }
+export interface HomeProps {}
 
 const Home = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <main className="flex-1">
-        <PartialIntroduction />
-        <PartialEditor />
+        <Introduction />
+        <EditorDemo />
       </main>
     </div>
   )
