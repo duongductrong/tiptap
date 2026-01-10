@@ -19,7 +19,9 @@
 ---
 
 > [!CAUTION]
+>
 > ### ⚠️ Under Development
+>
 > This project is currently in its early stages of development. **Expect breaking changes, bugs, and incomplete documentation.** It is not yet recommended for production use.
 
 ## Features
@@ -42,7 +44,7 @@
 ## Installation
 
 ```bash
-npx shadcn@latest add https://tiptap-seven.vercel.app/schema/tiptap.json
+npx shadcn@latest add https://tiptap-seven.vercel.app/schema/editor.json
 ```
 
 ## Contributing
