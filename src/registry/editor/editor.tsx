@@ -1302,47 +1302,21 @@ function EditorFloatingMenu({ children, ...props }: EditorFloatingMenuProps) {
 }
 
 // =============================================================================
-// EditorBubbleMenuText
+// EditorBubbleMenu (Core Composition Component)
 // =============================================================================
 
-export interface EditorBubbleMenuTextProps extends Omit<
+export interface EditorBubbleMenuProps extends Omit<
   React.ComponentProps<typeof BubbleMenu>,
-  "editor" | "children"
+  "editor"
 > {}
 
-const EditorBubbleMenuText = React.forwardRef<
+const EditorBubbleMenu = React.forwardRef<
   HTMLDivElement,
-  EditorBubbleMenuTextProps
->((props, ref) => {
+  EditorBubbleMenuProps
+>(({ shouldShow, tippyOptions, className, children, ...props }, ref) => {
   const { editor } = useEditor()
-  const [linkUrl, setLinkUrl] = React.useState("")
-  const [showLinkInput, setShowLinkInput] = React.useState(false)
 
   if (!editor) return null
-
-  const handleSetLink = () => {
-    if (linkUrl) {
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: linkUrl })
-        .run()
-      setLinkUrl("")
-      setShowLinkInput(false)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      handleSetLink()
-    }
-    if (e.key === "Escape") {
-      setShowLinkInput(false)
-      setLinkUrl("")
-    }
-  }
 
   return (
     <BubbleMenu
@@ -1351,142 +1325,616 @@ const EditorBubbleMenuText = React.forwardRef<
       tippyOptions={{
         duration: 100,
         placement: "top",
+        ...tippyOptions,
       }}
-      shouldShow={({ editor: e, from, to }) => {
-        if (from === to) return false
-        if (e.isActive("table")) return false
-        if (e.isActive("codeBlock")) return false
-        if (e.isActive("image")) return false
-        return true
-      }}
-      className="w-fit"
+      shouldShow={shouldShow}
+      className={cn("w-fit", className)}
     >
-      <div
-        ref={ref}
-        className="bg-popover flex items-center gap-0.5 rounded-md border p-0.5 shadow-md"
-      >
-        {showLinkInput ? (
-          <div className="flex items-center gap-1 p-1">
-            <Input
-              type="url"
-              placeholder="https://..."
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="h-7 w-48 text-xs"
-              autoFocus
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={handleSetLink}
-            >
-              <Check className="size-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => {
-                setShowLinkInput(false)
-                setLinkUrl("")
-              }}
-            >
-              <Link2Off className="size-3.5" />
-            </Button>
-          </div>
-        ) : (
-          <>
-            <Button
-              variant={editor.isActive("bold") ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              title="Bold"
-            >
-              <Bold className="size-3.5" />
-            </Button>
-            <Button
-              variant={editor.isActive("italic") ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              title="Italic"
-            >
-              <Italic className="size-3.5" />
-            </Button>
-            <Button
-              variant={editor.isActive("underline") ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-              title="Underline"
-            >
-              <Underline className="size-3.5" />
-            </Button>
-            <Button
-              variant={editor.isActive("strike") ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              title="Strikethrough"
-            >
-              <Strikethrough className="size-3.5" />
-            </Button>
-            <Button
-              variant={editor.isActive("code") ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => editor.chain().focus().toggleCode().run()}
-              title="Code"
-            >
-              <Code className="size-3.5" />
-            </Button>
-
-            <div className="bg-border h-4 w-px" />
-
-            <Button
-              variant={editor.isActive("highlight") ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 w-7 p-0"
-              onClick={() => editor.chain().focus().toggleHighlight().run()}
-              title="Highlight"
-            >
-              <Highlighter className="size-3.5" />
-            </Button>
-
-            <div className="bg-border h-4 w-px" />
-
-            {editor.isActive("link") ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0"
-                onClick={() => editor.chain().focus().unsetLink().run()}
-                title="Remove Link"
-              >
-                <Link2Off className="size-3.5" />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0"
-                onClick={() => setShowLinkInput(true)}
-                title="Add Link"
-              >
-                <Link2 className="size-3.5" />
-              </Button>
-            )}
-          </>
-        )}
-      </div>
+      <div ref={ref}>{children}</div>
     </BubbleMenu>
   )
 })
-EditorBubbleMenuText.displayName = "EditorBubbleMenuText"
+EditorBubbleMenu.displayName = "EditorBubbleMenu"
 
+// =============================================================================
+// EditorBubbleMenuContent
+// =============================================================================
+
+export interface EditorBubbleMenuContentProps extends React.ComponentProps<"div"> {}
+
+const EditorBubbleMenuContent = React.forwardRef<
+  HTMLDivElement,
+  EditorBubbleMenuContentProps
+>(({ className, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "bg-popover flex items-center gap-0.5 rounded-md border p-0.5 shadow-md",
+        className
+      )}
+      {...props}
+    />
+  )
+})
+EditorBubbleMenuContent.displayName = "EditorBubbleMenuContent"
+
+// =============================================================================
+// EditorBubbleMenuGroup
+// =============================================================================
+
+export interface EditorBubbleMenuGroupProps extends React.ComponentProps<"div"> {}
+
+const EditorBubbleMenuGroup = React.forwardRef<
+  HTMLDivElement,
+  EditorBubbleMenuGroupProps
+>(({ className, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn("flex items-center gap-0.5", className)}
+      {...props}
+    />
+  )
+})
+EditorBubbleMenuGroup.displayName = "EditorBubbleMenuGroup"
+
+// =============================================================================
+// EditorBubbleMenuSeparator
+// =============================================================================
+
+export interface EditorBubbleMenuSeparatorProps extends React.ComponentProps<"div"> {}
+
+const EditorBubbleMenuSeparator = React.forwardRef<
+  HTMLDivElement,
+  EditorBubbleMenuSeparatorProps
+>(({ className, ...props }, ref) => {
+  return (
+    <div ref={ref} className={cn("bg-border h-4 w-px", className)} {...props} />
+  )
+})
+EditorBubbleMenuSeparator.displayName = "EditorBubbleMenuSeparator"
+
+// =============================================================================
+// EditorBubbleMenuButton
+// =============================================================================
+
+export interface EditorBubbleMenuButtonProps extends Omit<
+  React.ComponentProps<typeof Button>,
+  "onClick"
+> {
+  action?: EditorAction
+  isActive?: boolean
+  onAction?: () => void
+}
+
+const EditorBubbleMenuButton = React.forwardRef<
+  HTMLButtonElement,
+  EditorBubbleMenuButtonProps
+>(
+  (
+    { action, isActive: isActiveProp, onAction, className, children, ...props },
+    ref
+  ) => {
+    const { editor } = useEditor()
+    const [updateKey, forceUpdate] = React.useReducer((x) => x + 1, 0)
+
+    React.useEffect(() => {
+      if (!editor) return
+
+      const handleUpdate = () => forceUpdate()
+      editor.on("transaction", handleUpdate)
+
+      return () => {
+        editor.off("transaction", handleUpdate)
+      }
+    }, [editor])
+
+    const isActiveFromAction = React.useMemo(() => {
+      if (!editor || !action) return false
+      if (EDITOR_TEXT_ALIGN_ACTIONS.includes(action)) {
+        return editor.isActive({ textAlign: action })
+      }
+      return editor.isActive(action)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editor, action, updateKey])
+
+    const isActive = isActiveProp ?? isActiveFromAction
+
+    const handleClick = () => {
+      if (onAction) {
+        onAction()
+        return
+      }
+      if (action) {
+        executeEditorAction(editor, action)
+      }
+    }
+
+    const block = action ? EDITOR_BLOCKS_MAP.get(action) : undefined
+    const canUse = action ? canUseEditorAction(editor, action) : true
+
+    if (!editor) return null
+
+    return (
+      <Button
+        ref={ref}
+        type="button"
+        variant={isActive ? "secondary" : "ghost"}
+        size="sm"
+        disabled={!canUse}
+        onClick={handleClick}
+        aria-label={block?.label}
+        className={cn("h-7 w-7 p-0", className)}
+        {...props}
+      >
+        {children}
+      </Button>
+    )
+  }
+)
+EditorBubbleMenuButton.displayName = "EditorBubbleMenuButton"
+
+// =============================================================================
+// EditorBubbleMenuPopover Context
+// =============================================================================
+
+interface EditorBubbleMenuPopoverContextValue {
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+
+const EditorBubbleMenuPopoverContext =
+  React.createContext<EditorBubbleMenuPopoverContextValue | null>(null)
+
+function useEditorBubbleMenuPopover() {
+  const ctx = React.useContext(EditorBubbleMenuPopoverContext)
+  if (!ctx) {
+    throw new Error(
+      "useEditorBubbleMenuPopover must be used within EditorBubbleMenuPopover"
+    )
+  }
+  return ctx
+}
+
+// =============================================================================
+// EditorBubbleMenuPopover
+// =============================================================================
+
+export interface EditorBubbleMenuPopoverProps {
+  children: React.ReactNode
+  open?: boolean
+  defaultOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+function EditorBubbleMenuPopover({
+  children,
+  open: controlledOpen,
+  defaultOpen = false,
+  onOpenChange,
+}: EditorBubbleMenuPopoverProps) {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen)
+
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+
+  const setOpen = React.useCallback(
+    (nextOpen: boolean) => {
+      if (!isControlled) {
+        setInternalOpen(nextOpen)
+      }
+      onOpenChange?.(nextOpen)
+    },
+    [isControlled, onOpenChange]
+  )
+
+  const contextValue = React.useMemo(() => ({ open, setOpen }), [open, setOpen])
+
+  return (
+    <EditorBubbleMenuPopoverContext.Provider value={contextValue}>
+      <div className="relative">{children}</div>
+    </EditorBubbleMenuPopoverContext.Provider>
+  )
+}
+EditorBubbleMenuPopover.displayName = "EditorBubbleMenuPopover"
+
+// =============================================================================
+// EditorBubbleMenuPopoverTrigger
+// =============================================================================
+
+export interface EditorBubbleMenuPopoverTriggerProps extends React.ComponentProps<"button"> {
+  asChild?: boolean
+}
+
+const EditorBubbleMenuPopoverTrigger = React.forwardRef<
+  HTMLButtonElement,
+  EditorBubbleMenuPopoverTriggerProps
+>(({ asChild, onClick, children, ...props }, ref) => {
+  const { open, setOpen } = useEditorBubbleMenuPopover()
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setOpen(!open)
+    onClick?.(e)
+  }
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(
+      children as React.ReactElement<{
+        onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+        "data-state"?: string
+      }>,
+      {
+        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+          handleClick(e)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(children as any).props?.onClick?.(e)
+        },
+        "data-state": open ? "open" : "closed",
+      }
+    )
+  }
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      data-state={open ? "open" : "closed"}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+})
+EditorBubbleMenuPopoverTrigger.displayName = "EditorBubbleMenuPopoverTrigger"
+
+// =============================================================================
+// EditorBubbleMenuPopoverContent
+// =============================================================================
+
+export interface EditorBubbleMenuPopoverContentProps extends React.ComponentProps<"div"> {
+  align?: "start" | "center" | "end"
+  side?: "top" | "bottom"
+  sideOffset?: number
+}
+
+const EditorBubbleMenuPopoverContent = React.forwardRef<
+  HTMLDivElement,
+  EditorBubbleMenuPopoverContentProps
+>(
+  (
+    { className, align = "start", side = "bottom", sideOffset = 4, ...props },
+    ref
+  ) => {
+    const { open, setOpen } = useEditorBubbleMenuPopover()
+    const contentRef = React.useRef<HTMLDivElement>(null)
+
+    React.useEffect(() => {
+      if (!open) return
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          setOpen(false)
+        }
+      }
+
+      document.addEventListener("keydown", handleKeyDown)
+      return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [open, setOpen])
+
+    React.useEffect(() => {
+      if (open && contentRef.current) {
+        const firstInput = contentRef.current.querySelector("input")
+        if (firstInput) {
+          firstInput.focus()
+        }
+      }
+    }, [open])
+
+    if (!open) return null
+
+    const alignClasses = {
+      start: "left-0",
+      center: "left-1/2 -translate-x-1/2",
+      end: "right-0",
+    }
+
+    const sideClasses = {
+      top: "bottom-full mb-1",
+      bottom: "top-full mt-1",
+    }
+
+    return (
+      <div
+        ref={(node) => {
+          contentRef.current = node
+          if (typeof ref === "function") ref(node)
+          else if (ref) ref.current = node
+        }}
+        className={cn(
+          "bg-popover text-popover-foreground absolute z-50 min-w-[200px] rounded-md border p-2 shadow-md",
+          "animate-in fade-in-0 zoom-in-95",
+          alignClasses[align],
+          sideClasses[side],
+          className
+        )}
+        style={{
+          marginTop: side === "bottom" ? sideOffset : undefined,
+          marginBottom: side === "top" ? sideOffset : undefined,
+        }}
+        {...props}
+      />
+    )
+  }
+)
+EditorBubbleMenuPopoverContent.displayName = "EditorBubbleMenuPopoverContent"
+
+// =============================================================================
+// EditorBubbleMenuForm Context
+// =============================================================================
+
+interface EditorBubbleMenuFormContextValue {
+  values: Record<string, string>
+  setValue: (name: string, value: string) => void
+  submit: () => void
+  cancel: () => void
+}
+
+const EditorBubbleMenuFormContext =
+  React.createContext<EditorBubbleMenuFormContextValue | null>(null)
+
+function useEditorBubbleMenuForm() {
+  const ctx = React.useContext(EditorBubbleMenuFormContext)
+  if (!ctx) {
+    throw new Error(
+      "useEditorBubbleMenuForm must be used within EditorBubbleMenuForm"
+    )
+  }
+  return ctx
+}
+
+// =============================================================================
+// EditorBubbleMenuForm
+// =============================================================================
+
+export interface EditorBubbleMenuFormProps extends Omit<
+  React.ComponentProps<"form">,
+  "onSubmit"
+> {
+  onSubmit?: (values: Record<string, string>, editor: Editor) => void
+  onCancel?: () => void
+  closeOnSubmit?: boolean
+}
+
+const EditorBubbleMenuForm = React.forwardRef<
+  HTMLFormElement,
+  EditorBubbleMenuFormProps
+>(
+  (
+    {
+      onSubmit: onSubmitProp,
+      onCancel,
+      closeOnSubmit = true,
+      className,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const { editor } = useEditor()
+    const popoverCtx = React.useContext(EditorBubbleMenuPopoverContext)
+    const [values, setValues] = React.useState<Record<string, string>>({})
+
+    const setValue = React.useCallback((name: string, value: string) => {
+      setValues((prev) => ({ ...prev, [name]: value }))
+    }, [])
+
+    const submit = React.useCallback(() => {
+      onSubmitProp?.(values, editor!)
+      if (closeOnSubmit && popoverCtx) {
+        popoverCtx.setOpen(false)
+      }
+    }, [values, onSubmitProp, closeOnSubmit, popoverCtx])
+
+    const cancel = React.useCallback(() => {
+      onCancel?.()
+      popoverCtx?.setOpen(false)
+    }, [onCancel, popoverCtx])
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      submit()
+    }
+
+    const contextValue = React.useMemo(
+      () => ({ values, setValue, submit, cancel }),
+      [values, setValue, submit, cancel]
+    )
+
+    return (
+      <EditorBubbleMenuFormContext.Provider value={contextValue}>
+        <form
+          ref={ref}
+          onSubmit={handleSubmit}
+          className={cn("flex flex-col gap-2", className)}
+          {...props}
+        >
+          {children}
+        </form>
+      </EditorBubbleMenuFormContext.Provider>
+    )
+  }
+)
+EditorBubbleMenuForm.displayName = "EditorBubbleMenuForm"
+
+// =============================================================================
+// EditorBubbleMenuInput
+// =============================================================================
+
+export type EditorBubbleMenuInputBinding =
+  | string
+  | ((editor: Editor) => string | undefined)
+
+export interface EditorBubbleMenuInputProps extends Omit<
+  React.ComponentProps<typeof Input>,
+  "name" | "value" | "onChange"
+> {
+  name: string
+  binding?: EditorBubbleMenuInputBinding
+  onValueChange?: (value: string) => void
+}
+
+const EditorBubbleMenuInput = React.forwardRef<
+  HTMLInputElement,
+  EditorBubbleMenuInputProps
+>(({ name, binding, onValueChange, onKeyDown, className, ...props }, ref) => {
+  const { editor } = useEditor()
+  const formCtx = React.useContext(EditorBubbleMenuFormContext)
+  const [localValue, setLocalValue] = React.useState("")
+
+  // Use ref for setValue to avoid dependency issues
+  const setValueRef = React.useRef(formCtx?.setValue)
+  setValueRef.current = formCtx?.setValue
+
+  // Get initial value from binding - only run once when popover opens
+  React.useEffect(() => {
+    if (!editor || !binding) return
+
+    let initialValue: string | undefined
+
+    if (typeof binding === "function") {
+      initialValue = binding(editor)
+    } else {
+      // Parse dot notation: "link.href" -> mark="link", attr="href"
+      const [mark, attr] = binding.split(".")
+      if (mark && attr) {
+        const attrs = editor.getAttributes(mark)
+        initialValue = attrs?.[attr] as string | undefined
+      } else {
+        // Single value means it's just a mark name, get all attributes
+        initialValue = editor.getAttributes(binding)?.[binding] as
+          | string
+          | undefined
+      }
+    }
+
+    const value = initialValue ?? ""
+    setLocalValue(value)
+    setValueRef.current?.(name, value)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, binding, name])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setLocalValue(newValue)
+    formCtx?.setValue(name, newValue)
+    onValueChange?.(newValue)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && formCtx) {
+      e.preventDefault()
+      formCtx.submit()
+    }
+    onKeyDown?.(e)
+  }
+
+  return (
+    <Input
+      ref={ref}
+      name={name}
+      value={localValue}
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
+      className={cn("h-8 text-sm", className)}
+      {...props}
+    />
+  )
+})
+EditorBubbleMenuInput.displayName = "EditorBubbleMenuInput"
+
+// =============================================================================
+// EditorBubbleMenuFormActions
+// =============================================================================
+
+export interface EditorBubbleMenuFormActionsProps extends React.ComponentProps<"div"> {}
+
+const EditorBubbleMenuFormActions = React.forwardRef<
+  HTMLDivElement,
+  EditorBubbleMenuFormActionsProps
+>(({ className, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn("flex items-center justify-end gap-1", className)}
+      {...props}
+    />
+  )
+})
+EditorBubbleMenuFormActions.displayName = "EditorBubbleMenuFormActions"
+
+// =============================================================================
+// EditorBubbleMenuFormSubmit
+// =============================================================================
+
+export interface EditorBubbleMenuFormSubmitProps extends Omit<
+  React.ComponentProps<typeof Button>,
+  "type" | "onClick"
+> {}
+
+const EditorBubbleMenuFormSubmit = React.forwardRef<
+  HTMLButtonElement,
+  EditorBubbleMenuFormSubmitProps
+>(({ className, children, ...props }, ref) => {
+  const { submit } = useEditorBubbleMenuForm()
+
+  return (
+    <Button
+      ref={ref}
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={submit}
+      className={cn("h-7 w-7 p-0", className)}
+      {...props}
+    >
+      {children ?? <Check className="size-3.5" />}
+    </Button>
+  )
+})
+EditorBubbleMenuFormSubmit.displayName = "EditorBubbleMenuFormSubmit"
+
+// =============================================================================
+// EditorBubbleMenuFormCancel
+// =============================================================================
+
+export interface EditorBubbleMenuFormCancelProps extends Omit<
+  React.ComponentProps<typeof Button>,
+  "type" | "onClick"
+> {}
+
+const EditorBubbleMenuFormCancel = React.forwardRef<
+  HTMLButtonElement,
+  EditorBubbleMenuFormCancelProps
+>(({ className, children, ...props }, ref) => {
+  const { cancel } = useEditorBubbleMenuForm()
+
+  return (
+    <Button
+      ref={ref}
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={cancel}
+      className={cn("h-7 w-7 p-0", className)}
+      {...props}
+    >
+      {children ?? <Link2Off className="size-3.5" />}
+    </Button>
+  )
+})
+EditorBubbleMenuFormCancel.displayName = "EditorBubbleMenuFormCancel"
 // =============================================================================
 // Hooks
 // =============================================================================
@@ -1536,8 +1984,20 @@ export function toLatentArray<T>(...inputs: NestedArray<T>[]): T[] {
 // =============================================================================
 
 export {
+  EditorBubbleMenu,
+  EditorBubbleMenuButton,
+  EditorBubbleMenuContent,
+  EditorBubbleMenuForm,
+  EditorBubbleMenuFormActions,
+  EditorBubbleMenuFormCancel,
+  EditorBubbleMenuFormSubmit,
+  EditorBubbleMenuGroup,
+  EditorBubbleMenuInput,
   EditorBubbleMenuLink,
-  EditorBubbleMenuText,
+  EditorBubbleMenuPopover,
+  EditorBubbleMenuPopoverContent,
+  EditorBubbleMenuPopoverTrigger,
+  EditorBubbleMenuSeparator,
   EditorButton,
   EditorButtonGroup,
   EditorContent,

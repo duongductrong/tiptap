@@ -13,8 +13,22 @@
  * Use this as a reference for building a Notion-like editing experience.
  */
 
+import type { Editor } from "@tiptap/react"
+
 import {
-  EditorBubbleMenuText,
+  EditorBubbleMenu,
+  EditorBubbleMenuButton,
+  EditorBubbleMenuContent,
+  EditorBubbleMenuForm,
+  EditorBubbleMenuFormActions,
+  EditorBubbleMenuFormCancel,
+  EditorBubbleMenuFormSubmit,
+  EditorBubbleMenuGroup,
+  EditorBubbleMenuInput,
+  EditorBubbleMenuPopover,
+  EditorBubbleMenuPopoverContent,
+  EditorBubbleMenuPopoverTrigger,
+  EditorBubbleMenuSeparator,
   EditorButton,
   EditorButtonGroup,
   EditorContent,
@@ -54,6 +68,23 @@ import {
   Underline,
   Undo,
 } from "lucide-react"
+
+// Bubble menu should show for text selection, excluding tables/code blocks/images
+const shouldShowTextBubbleMenu = ({
+  editor,
+  from,
+  to,
+}: {
+  editor: Editor
+  from: number
+  to: number
+}) => {
+  if (from === to) return false
+  if (editor.isActive("table")) return false
+  if (editor.isActive("codeBlock")) return false
+  if (editor.isActive("image")) return false
+  return true
+}
 
 // Word count component using useEditor hook
 function WordCount() {
@@ -211,8 +242,68 @@ export function FullFeaturedEditor({
       {/* Word Count Footer */}
       <WordCount />
 
-      {/* Core Bubble Menus (not tied to specific extensions) */}
-      <EditorBubbleMenuText />
+      {/* Composable Bubble Menu for Text Selection */}
+      <EditorBubbleMenu shouldShow={shouldShowTextBubbleMenu}>
+        <EditorBubbleMenuContent>
+          <EditorBubbleMenuGroup>
+            <EditorBubbleMenuButton action="bold" title="Bold">
+              <Bold className="size-3.5" />
+            </EditorBubbleMenuButton>
+            <EditorBubbleMenuButton action="italic" title="Italic">
+              <Italic className="size-3.5" />
+            </EditorBubbleMenuButton>
+            <EditorBubbleMenuButton action="underline" title="Underline">
+              <Underline className="size-3.5" />
+            </EditorBubbleMenuButton>
+            <EditorBubbleMenuButton action="strike" title="Strikethrough">
+              <Strikethrough className="size-3.5" />
+            </EditorBubbleMenuButton>
+            <EditorBubbleMenuButton action="code" title="Code">
+              <Code className="size-3.5" />
+            </EditorBubbleMenuButton>
+          </EditorBubbleMenuGroup>
+
+          <EditorBubbleMenuSeparator />
+
+          <EditorBubbleMenuButton action="highlight" title="Highlight">
+            <Highlighter className="size-3.5" />
+          </EditorBubbleMenuButton>
+
+          <EditorBubbleMenuSeparator />
+
+          <EditorBubbleMenuPopover>
+            <EditorBubbleMenuPopoverTrigger asChild>
+              <EditorBubbleMenuButton title="Add Link">
+                <Link2 className="size-3.5" />
+              </EditorBubbleMenuButton>
+            </EditorBubbleMenuPopoverTrigger>
+            <EditorBubbleMenuPopoverContent align="end">
+              <EditorBubbleMenuForm
+                className="flex gap-4"
+                onSubmit={(values, editor) =>
+                  editor
+                    ?.chain()
+                    .focus()
+                    .extendMarkRange("link")
+                    .setLink({ href: values?.href })
+                    .run()
+                }
+              >
+                <EditorBubbleMenuInput
+                  name="href"
+                  binding="link.href"
+                  placeholder="https://..."
+                  type="url"
+                />
+                <EditorBubbleMenuFormActions>
+                  <EditorBubbleMenuFormCancel />
+                  <EditorBubbleMenuFormSubmit />
+                </EditorBubbleMenuFormActions>
+              </EditorBubbleMenuForm>
+            </EditorBubbleMenuPopoverContent>
+          </EditorBubbleMenuPopover>
+        </EditorBubbleMenuContent>
+      </EditorBubbleMenu>
     </EditorProvider>
   )
 }

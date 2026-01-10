@@ -11,19 +11,14 @@
  * Use this as a reference for adding AI features, custom blocks, or other functionality.
  */
 
-import * as React from "react"
+import {
+  EditorContent,
+  EditorContext,
+  EditorProvider,
+} from "@/registry/editor/editor"
 import { Extension } from "@tiptap/core"
 import { BubbleMenu } from "@tiptap/react"
-import {
-  EditorProvider,
-  EditorToolbar,
-  EditorButton,
-  EditorButtonGroup,
-  EditorContent,
-  EditorBubbleMenuText,
-  EditorContext,
-  EDITOR_ACTIONS,
-} from "@/registry/editor/editor"
+import * as React from "react"
 
 import {
   EditorSlashMenuExtension,
@@ -39,16 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import {
-  Bold,
-  Italic,
-  Underline,
-  Sparkles,
-  Wand2,
-  Loader2,
-  Languages,
-  CheckCheck,
-} from "lucide-react"
+import { CheckCheck, Languages, Loader2, Sparkles, Wand2 } from "lucide-react"
 
 // =============================================================================
 // Custom "Ask AI" Extension
@@ -279,24 +265,7 @@ export function CustomExtensionEditor({
         }),
       ]}
     >
-      <EditorToolbar className="flex items-center gap-1 p-2">
-        <EditorButtonGroup>
-          <EditorButton action={EDITOR_ACTIONS.bold}>
-            <Bold className="size-4" />
-          </EditorButton>
-          <EditorButton action={EDITOR_ACTIONS.italic}>
-            <Italic className="size-4" />
-          </EditorButton>
-          <EditorButton action={EDITOR_ACTIONS.underline}>
-            <Underline className="size-4" />
-          </EditorButton>
-        </EditorButtonGroup>
-      </EditorToolbar>
-
       <EditorContent className="prose dark:prose-invert min-h-[300px] max-w-none p-4" />
-
-      {/* Standard text bubble menu */}
-      <EditorBubbleMenuText />
 
       {/* Custom AI bubble menu */}
       <EditorBubbleMenuAI />
