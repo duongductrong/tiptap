@@ -887,7 +887,7 @@ const EditorButton = React.forwardRef<HTMLButtonElement, EditorButtonProps>(
     ref
   ) => {
     const { editor } = useEditor()
-    const [, forceUpdate] = React.useReducer((x) => x + 1, 0)
+    const [updateKey, forceUpdate] = React.useReducer((x) => x + 1, 0)
 
     React.useEffect(() => {
       if (!editor) return
@@ -906,7 +906,8 @@ const EditorButton = React.forwardRef<HTMLButtonElement, EditorButtonProps>(
         return editor.isActive({ textAlign: action })
       }
       return editor.isActive(action)
-    }, [editor, action])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editor, action, updateKey])
 
     const canUse = canUseEditorAction(editor, action)
 
