@@ -1,14 +1,11 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Layers, Sparkles, Eye, ArrowLeft } from "lucide-react"
+import { Eye, FileText, Layers, Sparkles } from "lucide-react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import {
-  MinimalEditor,
-  FullFeaturedEditor,
   CustomExtensionEditor,
+  FullFeaturedEditor,
   ReadOnlyViewerDemo,
 } from "../components"
 
@@ -19,14 +16,9 @@ const PlaygroundPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto max-w-5xl flex-1 px-4 py-8 md:py-12">
+      <main className="container mx-auto max-w-7xl flex-1 px-4 py-8 md:py-12">
         {/* Header */}
         <div className="mb-8 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/">
-              <ArrowLeft className="size-4" />
-            </Link>
-          </Button>
           <div className="mx-auto text-center">
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               Editor Playground
@@ -45,10 +37,6 @@ const PlaygroundPage = () => {
         >
           <div className="flex justify-center">
             <TabsList className="mb-6 h-auto flex-wrap gap-1">
-              <TabsTrigger value="minimal" className="gap-2">
-                <FileText className="size-4" />
-                Minimal
-              </TabsTrigger>
               <TabsTrigger value="full" className="gap-2">
                 <Layers className="size-4" />
                 Full-Featured
@@ -63,11 +51,6 @@ const PlaygroundPage = () => {
               </TabsTrigger>
             </TabsList>
           </div>
-
-          {/* Minimal Editor */}
-          <TabsContent value="minimal" className="mt-0">
-            <MinimalEditor />
-          </TabsContent>
 
           {/* Full-Featured Editor */}
           <TabsContent value="full" className="mt-0">

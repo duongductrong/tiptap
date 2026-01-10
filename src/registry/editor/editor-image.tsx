@@ -1,20 +1,11 @@
 "use client"
 
-import * as React from "react"
-import { Node, mergeAttributes } from "@tiptap/core"
-import {
-  BubbleMenu,
-  NodeViewWrapper,
-  ReactNodeViewRenderer,
-} from "@tiptap/react"
-import { EditorContext, type EditorContextValue } from "./editor"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DropdownMenuContent as DropdownMenuContentPrimitive } from "@radix-ui/react-dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -23,6 +14,13 @@ import {
 } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { DropdownMenuContent as DropdownMenuContentPrimitive } from "@radix-ui/react-dropdown-menu"
+import { Node, mergeAttributes } from "@tiptap/core"
+import {
+  BubbleMenu,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from "@tiptap/react"
 import {
   AlertCircle,
   AlignCenter,
@@ -40,6 +38,8 @@ import {
   Upload,
   X,
 } from "lucide-react"
+import * as React from "react"
+import { EditorContext, createEditorExtension } from "./editor"
 
 // =============================================================================
 // Types & Configuration
@@ -728,7 +728,7 @@ declare module "@tiptap/core" {
   }
 }
 
-export const EditorImageExtension = Node.create<EditorImageOptions>({
+const EditorImageNode = Node.create<EditorImageOptions>({
   name: "image",
 
   addOptions() {
@@ -843,6 +843,15 @@ export const EditorImageExtension = Node.create<EditorImageOptions>({
         },
     }
   },
+})
+
+export const EditorImageExtension = createEditorExtension<EditorImageOptions>({
+  extension: EditorImageNode,
+  bubbleMenu: EditorBubbleMenuImage,
+  onConfigure: (options, current) => ({
+    ...current,
+    extension: EditorImageNode.configure(options),
+  }),
 })
 
 // =============================================================================

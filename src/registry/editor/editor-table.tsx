@@ -1,20 +1,18 @@
 "use client"
 
-import * as React from "react"
-import { Table } from "@tiptap/extension-table"
-import { TableCell } from "@tiptap/extension-table-cell"
-import { TableHeader } from "@tiptap/extension-table-header"
-import { TableRow } from "@tiptap/extension-table-row"
-import { BubbleMenu, useEditorState } from "@tiptap/react"
-import { EditorContext } from "./editor"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DropdownMenuContent as DropdownMenuContentPrimitive } from "@radix-ui/react-dropdown-menu"
 import { cn } from "@/lib/utils"
+import { DropdownMenuContent as DropdownMenuContentPrimitive } from "@radix-ui/react-dropdown-menu"
+import { Table } from "@tiptap/extension-table"
+import { TableCell } from "@tiptap/extension-table-cell"
+import { TableHeader } from "@tiptap/extension-table-header"
+import { TableRow } from "@tiptap/extension-table-row"
+import { BubbleMenu, useEditorState } from "@tiptap/react"
 import {
   AlignCenter,
   AlignLeft,
@@ -34,6 +32,8 @@ import {
   TableProperties,
   Trash2,
 } from "lucide-react"
+import * as React from "react"
+import { EditorContext, createEditorExtension } from "./editor"
 
 // =============================================================================
 // EditorTableExtension
@@ -153,20 +153,24 @@ export const EditorTableCellExtension = TableCell.extend({
   },
 })
 
-// Export as array for easy use
-export const EditorTableExtensions = [
-  EditorTableExtension,
-  EditorTableRowExtension,
-  EditorTableHeaderExtension,
-  EditorTableCellExtension,
-]
+export const EditorTableExtensions = createEditorExtension({
+  extension: [
+    EditorTableExtension,
+    EditorTableRowExtension,
+    EditorTableHeaderExtension,
+    EditorTableCellExtension,
+  ],
+  bubbleMenu: EditorBubbleMenuTable,
+})
 
 // =============================================================================
 // EditorBubbleMenuTable
 // =============================================================================
 
-export interface EditorBubbleMenuTableProps
-  extends Omit<React.ComponentProps<typeof BubbleMenu>, "editor" | "children"> {}
+export interface EditorBubbleMenuTableProps extends Omit<
+  React.ComponentProps<typeof BubbleMenu>,
+  "editor" | "children"
+> {}
 
 export function EditorBubbleMenuTable(props: EditorBubbleMenuTableProps) {
   const ctx = React.useContext(EditorContext)
@@ -177,31 +181,32 @@ export function EditorBubbleMenuTable(props: EditorBubbleMenuTableProps) {
     canSplitCell = false,
     canDeleteColumn = false,
     canDeleteRow = false,
-  } =
-    useEditorState({
-      editor: editor ?? null,
-      selector: ({ editor: e }): {
-        canMergeCells: boolean
-        canSplitCell: boolean
-        canDeleteColumn: boolean
-        canDeleteRow: boolean
-      } => {
-        if (!e) {
-          return {
-            canMergeCells: false,
-            canSplitCell: false,
-            canDeleteColumn: false,
-            canDeleteRow: false,
-          }
-        }
+  } = useEditorState({
+    editor: editor ?? null,
+    selector: ({
+      editor: e,
+    }): {
+      canMergeCells: boolean
+      canSplitCell: boolean
+      canDeleteColumn: boolean
+      canDeleteRow: boolean
+    } => {
+      if (!e) {
         return {
-          canMergeCells: e.can().mergeCells(),
-          canSplitCell: e.can().splitCell(),
-          canDeleteColumn: e.can().deleteColumn(),
-          canDeleteRow: e.can().deleteRow(),
+          canMergeCells: false,
+          canSplitCell: false,
+          canDeleteColumn: false,
+          canDeleteRow: false,
         }
-      },
-    }) ?? {}
+      }
+      return {
+        canMergeCells: e.can().mergeCells(),
+        canSplitCell: e.can().splitCell(),
+        canDeleteColumn: e.can().deleteColumn(),
+        canDeleteRow: e.can().deleteRow(),
+      }
+    },
+  }) ?? {}
 
   if (!editor) return null
 
@@ -490,4 +495,3 @@ export function EditorBubbleMenuTable(props: EditorBubbleMenuTableProps) {
     </BubbleMenu>
   )
 }
-

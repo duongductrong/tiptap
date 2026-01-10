@@ -11,16 +11,13 @@
  * Use this for displaying user-generated content.
  */
 
-import { EditorProvider, EditorContent } from "@/registry/editor/editor"
+import { EditorContent, EditorProvider } from "@/registry/editor/editor"
 
 import { EditorImageExtension } from "@/registry/editor/editor-image"
 
 import { EditorTableExtensions } from "@/registry/editor/editor-table"
 
-import {
-  EditorCodeBlockExtension,
-  CODEBLOCK_STYLES,
-} from "@/registry/editor/editor-code-block"
+import { EditorCodeBlockExtension } from "@/registry/editor/editor-code-block"
 
 interface ReadOnlyViewerProps {
   content: string
@@ -34,15 +31,12 @@ export function ReadOnlyViewer({ content, className }: ReadOnlyViewerProps) {
       editable={false}
       extensions={[
         EditorImageExtension,
-        ...EditorTableExtensions,
+        EditorTableExtensions,
         EditorCodeBlockExtension,
       ]}
     >
-      <style>{CODEBLOCK_STYLES}</style>
       <EditorContent
-        className={
-          className ?? "prose prose-sm dark:prose-invert max-w-none p-4"
-        }
+        className={className ?? "prose dark:prose-invert max-w-none p-4"}
       />
       {/* No bubble menus or toolbars needed for read-only mode */}
     </EditorProvider>
@@ -86,12 +80,5 @@ console.log(greet("World"));</code></pre>
 `
 
 export function ReadOnlyViewerDemo() {
-  return (
-    <div className="rounded-lg border">
-      <div className="bg-muted/50 border-b px-4 py-2">
-        <span className="text-muted-foreground text-sm">Read-Only Mode</span>
-      </div>
-      <ReadOnlyViewer content={SAMPLE_CONTENT} />
-    </div>
-  )
+  return <ReadOnlyViewer content={SAMPLE_CONTENT} />
 }

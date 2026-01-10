@@ -279,7 +279,7 @@ export function CustomExtensionEditor({
         }),
       ]}
     >
-      <EditorToolbar className="flex items-center gap-1 border-b p-2">
+      <EditorToolbar className="flex items-center gap-1 p-2">
         <EditorButtonGroup>
           <EditorButton action={EDITOR_ACTIONS.bold}>
             <Bold className="size-4" />
@@ -293,7 +293,7 @@ export function CustomExtensionEditor({
         </EditorButtonGroup>
       </EditorToolbar>
 
-      <EditorContent className="prose prose-sm dark:prose-invert min-h-[300px] max-w-none p-4" />
+      <EditorContent className="prose dark:prose-invert min-h-[300px] max-w-none p-4" />
 
       {/* Standard text bubble menu */}
       <EditorBubbleMenuText />

@@ -5,7 +5,7 @@ import { Extension } from "@tiptap/core"
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
 import { BubbleMenu } from "@tiptap/react"
 import { all, createLowlight } from "lowlight"
-import { EditorContext } from "./editor"
+import { EditorContext, createEditorExtension } from "./editor"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -83,13 +83,18 @@ export interface EditorCodeBlockOptions {
   HTMLAttributes?: Record<string, unknown>
 }
 
-export const EditorCodeBlockExtension = Extension.create({
+const EditorCodeBlockNode = Extension.create({
   name: "codeBlockLowlight",
   addExtensions() {
     return [
       CodeBlockLowlight.configure({ lowlight, defaultLanguage: "plaintext" }),
     ]
   },
+})
+
+export const EditorCodeBlockExtension = createEditorExtension({
+  extension: EditorCodeBlockNode,
+  bubbleMenu: EditorBubbleMenuCodeBlock,
 })
 
 // =============================================================================
@@ -230,8 +235,10 @@ export function injectCodeBlockStyles() {
 // EditorBubbleMenuCodeBlock
 // =============================================================================
 
-export interface EditorBubbleMenuCodeBlockProps
-  extends Omit<React.ComponentProps<typeof BubbleMenu>, "editor" | "children"> {
+export interface EditorBubbleMenuCodeBlockProps extends Omit<
+  React.ComponentProps<typeof BubbleMenu>,
+  "editor" | "children"
+> {
   children?: React.ReactNode
 }
 
@@ -394,7 +401,11 @@ export function EditorBubbleMenuCodeBlock(
               <ChevronDown className="size-3 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0" align="start" sideOffset={8}>
+          <PopoverContent
+            className="w-[200px] p-0"
+            align="start"
+            sideOffset={8}
+          >
             <Command>
               <CommandInput placeholder="Search language..." className="h-9" />
               <CommandList>

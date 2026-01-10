@@ -5,9 +5,6 @@
  * different usage patterns for the modular Tiptap editor.
  */
 
-// Minimal editor with basic formatting
-export { MinimalEditor } from "./minimal-editor"
-
 // Full-featured editor with all extensions
 export { FullFeaturedEditor } from "./full-featured-editor"
 

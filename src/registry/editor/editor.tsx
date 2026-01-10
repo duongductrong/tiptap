@@ -405,6 +405,142 @@ export const defaultExtensions = [
 ]
 
 // =============================================================================
+// Extension with Bubble Menu Types
+// =============================================================================
+
+type NestedArray<T> = T | NestedArray<T>[]
+
+export type EditorExtensions = NestedArray<Extensions[number]>
+
+export interface BubbleMenuComponentProps {
+  className?: string
+}
+
+export interface EditorExtensionWithBubbleMenu<TConfig = unknown> {
+  __editorExtension: true
+  extension: EditorExtensions | EditorExtensions[]
+  bubbleMenu?: React.ComponentType<BubbleMenuComponentProps>
+  bubbleMenuProps?: BubbleMenuComponentProps
+  configure: (
+    options: Partial<TConfig>
+  ) => EditorExtensionWithBubbleMenu<TConfig>
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type EditorExtensionInput =
+  | EditorExtensions
+  | EditorExtensions[]
+  | EditorExtensionWithBubbleMenu<any>
+
+function isEditorExtensionWithBubbleMenu(
+  ext: EditorExtensionInput
+): ext is EditorExtensionWithBubbleMenu {
+  return (
+    typeof ext === "object" &&
+    ext !== null &&
+    "__editorExtension" in ext &&
+    ext.__editorExtension === true
+  )
+}
+
+export interface CreateEditorExtensionOptions<TConfig = unknown> {
+  extension: EditorExtensions | EditorExtensions[]
+  bubbleMenu?: React.ComponentType<BubbleMenuComponentProps>
+  bubbleMenuProps?: BubbleMenuComponentProps
+  defaultConfig?: TConfig
+  onConfigure?: (
+    options: Partial<TConfig>,
+    current: CreateEditorExtensionOptions<TConfig>
+  ) => CreateEditorExtensionOptions<TConfig>
+}
+
+export function createEditorExtension<TConfig = unknown>(
+  options: CreateEditorExtensionOptions<TConfig>
+): EditorExtensionWithBubbleMenu<TConfig> {
+  const result: EditorExtensionWithBubbleMenu<TConfig> = {
+    __editorExtension: true,
+    extension: options.extension,
+    bubbleMenu: options.bubbleMenu,
+    bubbleMenuProps: options.bubbleMenuProps,
+    configure(config: Partial<TConfig>) {
+      if (options.onConfigure) {
+        const newOptions = options.onConfigure(config, options)
+        return createEditorExtension(newOptions)
+      }
+
+      const extensions = Array.isArray(options.extension)
+        ? options.extension
+        : [options.extension]
+
+      const configuredExtensions = extensions.map((ext) => {
+        if (
+          ext &&
+          typeof ext === "object" &&
+          "configure" in ext &&
+          typeof ext.configure === "function"
+        ) {
+          return ext.configure(config as Record<string, unknown>)
+        }
+        return ext
+      })
+
+      return createEditorExtension({
+        ...options,
+        extension:
+          configuredExtensions.length === 1
+            ? configuredExtensions[0]
+            : configuredExtensions,
+        bubbleMenuProps: {
+          ...options.bubbleMenuProps,
+          ...((config as Record<string, unknown>)?.bubbleMenuProps as
+            | BubbleMenuComponentProps
+            | undefined),
+        },
+      })
+    },
+  }
+
+  return result
+}
+
+function extractExtensionsAndBubbleMenus(inputs: EditorExtensionInput[]): {
+  extensions: EditorExtensions[]
+  bubbleMenus: Array<{
+    component: React.ComponentType<BubbleMenuComponentProps>
+    props?: BubbleMenuComponentProps
+  }>
+} {
+  const extensions: EditorExtensions[] = []
+  const bubbleMenus: Array<{
+    component: React.ComponentType<BubbleMenuComponentProps>
+    props?: BubbleMenuComponentProps
+  }> = []
+
+  for (const input of inputs) {
+    if (isEditorExtensionWithBubbleMenu(input)) {
+      if (Array.isArray(input.extension)) {
+        extensions.push(...input.extension)
+      } else {
+        extensions.push(input.extension)
+      }
+
+      if (input.bubbleMenu) {
+        bubbleMenus.push({
+          component: input.bubbleMenu,
+          props: input.bubbleMenuProps,
+        })
+      }
+    } else if (Array.isArray(input)) {
+      extensions.push(...input)
+    } else {
+      extensions.push(input)
+    }
+  }
+
+  return { extensions, bubbleMenus }
+}
+
+// =============================================================================
 // Context
 // =============================================================================
 
@@ -718,14 +854,10 @@ export function getActiveEditorActions(editor: Editor | null): EditorAction[] {
 // EditorProvider
 // =============================================================================
 
-type NestedArray<T> = T | NestedArray<T>[]
-
-export type EditorExtensions = NestedArray<Extensions[number]>
-
 export interface EditorProviderProps
   extends React.PropsWithChildren, Omit<UseEditorOptions, "extensions"> {
   content?: string
-  extensions?: EditorExtensions[]
+  extensions?: EditorExtensionInput[]
   className?: string
 }
 
@@ -734,9 +866,14 @@ const EditorProvider = React.forwardRef<HTMLDivElement, EditorProviderProps>(
     { content, extensions = [], children, className, ...editorOptions },
     ref
   ) => {
+    const { extensions: extractedExtensions, bubbleMenus } = React.useMemo(
+      () => extractExtensionsAndBubbleMenus(extensions),
+      [extensions]
+    )
+
     const editor = useTiptapEditor({
       content,
-      extensions: toLatentArray(defaultExtensions, extensions),
+      extensions: toLatentArray(defaultExtensions, extractedExtensions),
       ...editorOptions,
     })
 
@@ -753,6 +890,9 @@ const EditorProvider = React.forwardRef<HTMLDivElement, EditorProviderProps>(
           data-editor-root=""
         >
           {children}
+          {bubbleMenus.map((menu, index) => (
+            <menu.component key={index} {...menu.props} />
+          ))}
         </div>
       </EditorContext.Provider>
     )

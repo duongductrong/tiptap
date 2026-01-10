@@ -14,7 +14,6 @@
  */
 
 import {
-  EditorBubbleMenuLink,
   EditorBubbleMenuText,
   EditorButton,
   EditorButtonGroup,
@@ -27,25 +26,15 @@ import {
   useEditor,
 } from "@/registry/editor/editor"
 
-import {
-  EditorBubbleMenuImage,
-  EditorImageExtension,
-} from "@/registry/editor/editor-image"
+import { EditorImageExtension } from "@/registry/editor/editor-image"
+import { EditorTableExtensions } from "@/registry/editor/editor-table"
 
-import {
-  EditorBubbleMenuTable,
-  EditorTableExtensions,
-} from "@/registry/editor/editor-table"
-
-import {
-  EditorBubbleMenuCodeBlock,
-  EditorCodeBlockExtension,
-} from "@/registry/editor/editor-code-block"
+import { EditorCodeBlockExtension } from "@/registry/editor/editor-code-block"
 
 import { EditorSlashMenuExtension } from "@/registry/editor/editor-slash-menu"
 
 import { EditorHighlightExtension } from "@/registry/editor/editor-highlight"
-import { EditorLinkExtension } from "@/registry/editor/editor-link"
+import { EditorLinkExtensions } from "@/registry/editor/editor-link"
 import { EditorPlaceholderExtension } from "@/registry/editor/editor-placeholder"
 import { EditorTaskListExtensions } from "@/registry/editor/editor-task-list"
 import {
@@ -96,7 +85,7 @@ export function FullFeaturedEditor({
     <EditorProvider
       content={content}
       extensions={[
-        EditorLinkExtension,
+        EditorLinkExtensions,
 
         EditorTaskListExtensions,
 
@@ -124,7 +113,7 @@ export function FullFeaturedEditor({
       }}
     >
       {/* Main Toolbar */}
-      <EditorToolbar className="flex flex-wrap items-center gap-1 border-b p-2">
+      <EditorToolbar className="flex flex-wrap items-center gap-1 p-2">
         {/* Undo/Redo */}
         <EditorButtonGroup>
           <EditorButton action="undo">
@@ -144,9 +133,6 @@ export function FullFeaturedEditor({
             "heading1",
             "heading2",
             "heading3",
-            "bulletList",
-            "orderedList",
-            "taskList",
             "blockquote",
             "codeBlock",
           ]}
@@ -220,17 +206,13 @@ export function FullFeaturedEditor({
       </EditorToolbar>
 
       {/* Editor Content */}
-      <EditorContent className="prose prose-sm dark:prose-invert min-h-[500px] max-w-none p-4" />
+      <EditorContent className="prose dark:prose-invert min-h-[500px] max-w-none p-4" />
 
       {/* Word Count Footer */}
       <WordCount />
 
-      {/* All Bubble Menus */}
+      {/* Core Bubble Menus (not tied to specific extensions) */}
       <EditorBubbleMenuText />
-      <EditorBubbleMenuLink />
-      <EditorBubbleMenuImage />
-      <EditorBubbleMenuTable />
-      <EditorBubbleMenuCodeBlock />
     </EditorProvider>
   )
 }

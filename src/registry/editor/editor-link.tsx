@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "@tiptap/extension-link"
 import { BubbleMenu } from "@tiptap/react"
-import { EditorContext } from "./editor"
+import { EditorContext, createEditorExtension } from "./editor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Check, ExternalLink, Link2, Link2Off } from "lucide-react"
@@ -154,3 +154,12 @@ export const EditorBubbleMenuLink = React.forwardRef<
   )
 })
 EditorBubbleMenuLink.displayName = "EditorBubbleMenuLink"
+
+// =============================================================================
+// EditorLinkExtensions (Bundled Extension + BubbleMenu)
+// =============================================================================
+
+export const EditorLinkExtensions = createEditorExtension({
+  extension: EditorLinkExtension,
+  bubbleMenu: EditorBubbleMenuLink,
+})
