@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/banner.png" alt="tiptap banner" />
   
-  <h1>tiptap</h1>
+  <h1>editor</h1>
   <p><strong>A beautiful rich text editor, made simple.</strong></p>
   
   <p>
