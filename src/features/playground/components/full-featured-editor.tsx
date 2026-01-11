@@ -16,6 +16,7 @@
 import type { Editor } from "@tiptap/react"
 
 import {
+  defaultEditorRegistry,
   EditorBubbleMenu,
   EditorBubbleMenuButton,
   EditorBubbleMenuContent,

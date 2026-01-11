@@ -12,6 +12,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import * as React from "react"
 
+import {
+  createEditorRegistry,
+  defaultEditorRegistry,
+  EditorActionRegistry,
+  type EditorActionConfig,
+} from "./editor-registry"
+
 import { TextAlign } from "@tiptap/extension-text-align"
 import TiptapTypography from "@tiptap/extension-typography"
 import TiptapUnderline from "@tiptap/extension-underline"
@@ -26,364 +33,9 @@ import {
   type UseEditorOptions,
 } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import {
-  AlignCenter,
-  AlignJustify,
-  AlignLeft,
-  AlignRight,
-  Bold,
-  Check,
-  CheckSquare,
-  ChevronDown,
-  Code,
-  Heading1,
-  Heading2,
-  Heading3,
-  Heading4,
-  Heading5,
-  Heading6,
-  Highlighter,
-  ImageUp,
-  Italic,
-  Link2,
-  Link2Off,
-  List,
-  ListOrdered,
-  Minus,
-  Redo,
-  Strikethrough,
-  TextQuote,
-  Type,
-  Underline,
-  Undo,
-} from "lucide-react"
+import { Check, ChevronDown, Link2Off } from "lucide-react"
 import { EditorBubbleMenuLink } from "./editor-link"
 import { EDITOR_PLACEHOLDER_CLASSES } from "./editor-placeholder"
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-export const EDITOR_ACTIONS = {
-  // @tiptap/starter-kit
-  undo: "undo",
-  redo: "redo",
-  bold: "bold",
-  italic: "italic",
-  strike: "strike",
-  code: "code",
-  divider: "divider",
-  heading1: "heading1",
-  heading2: "heading2",
-  heading3: "heading3",
-  heading4: "heading4",
-  heading5: "heading5",
-  heading6: "heading6",
-  text: "paragraph",
-  blockquote: "blockquote",
-  bulletList: "bulletList",
-  orderedList: "orderedList",
-  codeBlock: "codeBlock",
-  // @tiptap/extension-underline
-  underline: "underline",
-  // Text alignment
-  left: "left",
-  center: "center",
-  right: "right",
-  justify: "justify",
-  // Image
-  image: "image",
-  // Table
-  insertTable: "insertTable",
-  addColumnBefore: "addColumnBefore",
-  addColumnAfter: "addColumnAfter",
-  deleteColumn: "deleteColumn",
-  addRowBefore: "addRowBefore",
-  addRowAfter: "addRowAfter",
-  deleteRow: "deleteRow",
-  deleteTable: "deleteTable",
-  mergeCells: "mergeCells",
-  splitCell: "splitCell",
-  toggleHeaderColumn: "toggleHeaderColumn",
-  toggleHeaderRow: "toggleHeaderRow",
-  toggleHeaderCell: "toggleHeaderCell",
-  mergeOrSplit: "mergeOrSplit",
-  goToNextCell: "goToNextCell",
-  goToPreviousCell: "goToPreviousCell",
-  // Task list
-  taskList: "taskList",
-  // Highlight
-  highlight: "highlight",
-  // Link
-  setLink: "setLink",
-  unsetLink: "unsetLink",
-} as const
-
-export type EditorAction = (typeof EDITOR_ACTIONS)[keyof typeof EDITOR_ACTIONS]
-
-const EDITOR_TEXT_ALIGN_ACTIONS: EditorAction[] = [
-  EDITOR_ACTIONS.left,
-  EDITOR_ACTIONS.center,
-  EDITOR_ACTIONS.right,
-  EDITOR_ACTIONS.justify,
-]
-
-// =============================================================================
-// Types
-// =============================================================================
-
-export interface EditorBlock {
-  key: EditorAction
-  icon: React.ElementType
-  label: string
-  description: string
-}
-
-export const EDITOR_BLOCKS_MAP = new Map<EditorAction, EditorBlock>([
-  [
-    EDITOR_ACTIONS.undo,
-    {
-      key: EDITOR_ACTIONS.undo,
-      icon: Undo,
-      label: "Undo",
-      description: "Undo the last action",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.redo,
-    {
-      key: EDITOR_ACTIONS.redo,
-      icon: Redo,
-      label: "Redo",
-      description: "Redo the last action",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.text,
-    {
-      key: EDITOR_ACTIONS.text,
-      icon: Type,
-      label: "Text",
-      description: "Start writing with plain text",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.heading1,
-    {
-      key: EDITOR_ACTIONS.heading1,
-      icon: Heading1,
-      label: "Heading 1",
-      description: "Use this for main titles",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.heading2,
-    {
-      key: EDITOR_ACTIONS.heading2,
-      icon: Heading2,
-      label: "Heading 2",
-      description: "Ideal for subsections",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.heading3,
-    {
-      key: EDITOR_ACTIONS.heading3,
-      icon: Heading3,
-      label: "Heading 3",
-      description: "Use for smaller subsections",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.heading4,
-    {
-      key: EDITOR_ACTIONS.heading4,
-      icon: Heading4,
-      label: "Heading 4",
-      description: "Suitable for detailed sections",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.heading5,
-    {
-      key: EDITOR_ACTIONS.heading5,
-      icon: Heading5,
-      label: "Heading 5",
-      description: "For minor details",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.heading6,
-    {
-      key: EDITOR_ACTIONS.heading6,
-      icon: Heading6,
-      label: "Heading 6",
-      description: "Use for the smallest details",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.blockquote,
-    {
-      key: EDITOR_ACTIONS.blockquote,
-      icon: TextQuote,
-      label: "Quote",
-      description: "Capture a quote",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.bold,
-    {
-      key: EDITOR_ACTIONS.bold,
-      icon: Bold,
-      label: "Bold",
-      description: "Make text bold",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.italic,
-    {
-      key: EDITOR_ACTIONS.italic,
-      icon: Italic,
-      label: "Italic",
-      description: "Italicize text",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.underline,
-    {
-      key: EDITOR_ACTIONS.underline,
-      icon: Underline,
-      label: "Underline",
-      description: "Underline text",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.strike,
-    {
-      key: EDITOR_ACTIONS.strike,
-      icon: Strikethrough,
-      label: "Strikethrough",
-      description: "Strike through text",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.code,
-    {
-      key: EDITOR_ACTIONS.code,
-      icon: Code,
-      label: "Code",
-      description: "Format text as code",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.divider,
-    {
-      key: EDITOR_ACTIONS.divider,
-      icon: Minus,
-      label: "Divider",
-      description: "Visually divide blocks",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.bulletList,
-    {
-      key: EDITOR_ACTIONS.bulletList,
-      icon: List,
-      label: "Bullet List",
-      description: "Create a bullet list",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.orderedList,
-    {
-      key: EDITOR_ACTIONS.orderedList,
-      icon: ListOrdered,
-      label: "Ordered List",
-      description: "Create an ordered list",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.left,
-    {
-      key: EDITOR_ACTIONS.left,
-      icon: AlignLeft,
-      label: "Left",
-      description: "Align text to the left",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.center,
-    {
-      key: EDITOR_ACTIONS.center,
-      icon: AlignCenter,
-      label: "Center",
-      description: "Align text to the center",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.right,
-    {
-      key: EDITOR_ACTIONS.right,
-      icon: AlignRight,
-      label: "Right",
-      description: "Align text to the right",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.justify,
-    {
-      key: EDITOR_ACTIONS.justify,
-      icon: AlignJustify,
-      label: "Justify",
-      description: "Align text to justify",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.image,
-    {
-      key: EDITOR_ACTIONS.image,
-      icon: ImageUp,
-      label: "Image",
-      description: "Upload or embed an image",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.taskList,
-    {
-      key: EDITOR_ACTIONS.taskList,
-      icon: CheckSquare,
-      label: "Task List",
-      description: "Create a task list with checkboxes",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.highlight,
-    {
-      key: EDITOR_ACTIONS.highlight,
-      icon: Highlighter,
-      label: "Highlight",
-      description: "Highlight selected text",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.setLink,
-    {
-      key: EDITOR_ACTIONS.setLink,
-      icon: Link2,
-      label: "Add Link",
-      description: "Insert a hyperlink",
-    },
-  ],
-  [
-    EDITOR_ACTIONS.unsetLink,
-    {
-      key: EDITOR_ACTIONS.unsetLink,
-      icon: Link2Off,
-      label: "Remove Link",
-      description: "Remove the hyperlink",
-    },
-  ],
-])
 
 // =============================================================================
 // Default Extensions
@@ -403,10 +55,6 @@ export const defaultExtensions = [
   }),
   TiptapTypography.configure({}),
 ]
-
-// =============================================================================
-// Extension with Bubble Menu Types
-// =============================================================================
 
 type NestedArray<T> = T | NestedArray<T>[]
 
@@ -546,6 +194,7 @@ function extractExtensionsAndBubbleMenus(inputs: EditorExtensionInput[]): {
 
 export interface EditorContextValue {
   editor: Editor | null
+  registry: EditorActionRegistry<Editor>
 }
 
 export const EditorContext = React.createContext<EditorContextValue | null>(
@@ -561,296 +210,6 @@ export function useEditor(): EditorContextValue {
 }
 
 // =============================================================================
-// Utility Functions
-// =============================================================================
-
-export function canUseEditorAction(
-  editor: Editor | null,
-  action: EditorAction
-): boolean {
-  if (!editor) return false
-
-  switch (action) {
-    case EDITOR_ACTIONS.undo:
-      return editor.can().chain().focus().undo().run()
-    case EDITOR_ACTIONS.redo:
-      return editor.can().chain().focus().redo().run()
-    case EDITOR_ACTIONS.text:
-      return editor.can().chain().focus().setParagraph().run()
-    case EDITOR_ACTIONS.heading1:
-      return editor.can().chain().focus().setHeading({ level: 1 }).run()
-    case EDITOR_ACTIONS.heading2:
-      return editor.can().chain().focus().setHeading({ level: 2 }).run()
-    case EDITOR_ACTIONS.heading3:
-      return editor.can().chain().focus().setHeading({ level: 3 }).run()
-    case EDITOR_ACTIONS.heading4:
-      return editor.can().chain().focus().setHeading({ level: 4 }).run()
-    case EDITOR_ACTIONS.heading5:
-      return editor.can().chain().focus().setHeading({ level: 5 }).run()
-    case EDITOR_ACTIONS.heading6:
-      return editor.can().chain().focus().setHeading({ level: 6 }).run()
-    case EDITOR_ACTIONS.codeBlock:
-      return editor.can().chain().focus().toggleCodeBlock().run()
-    case EDITOR_ACTIONS.divider:
-      return editor.can().chain().focus().setHorizontalRule().run()
-    case EDITOR_ACTIONS.bold:
-      return editor.can().chain().focus().toggleBold().run()
-    case EDITOR_ACTIONS.italic:
-      return editor.can().chain().focus().toggleItalic().run()
-    case EDITOR_ACTIONS.strike:
-      return editor.can().chain().focus().toggleStrike().run()
-    case EDITOR_ACTIONS.code:
-      return editor.can().chain().focus().toggleCode().run()
-    case EDITOR_ACTIONS.blockquote:
-      return editor.can().chain().focus().setBlockquote().run()
-    case EDITOR_ACTIONS.bulletList:
-      return editor.can().chain().focus().toggleBulletList().run()
-    case EDITOR_ACTIONS.orderedList:
-      return editor.can().chain().focus().toggleOrderedList().run()
-    case EDITOR_ACTIONS.left:
-      return editor.can().chain().focus().setTextAlign("left").run()
-    case EDITOR_ACTIONS.center:
-      return editor.can().chain().focus().setTextAlign("center").run()
-    case EDITOR_ACTIONS.right:
-      return editor.can().chain().focus().setTextAlign("right").run()
-    case EDITOR_ACTIONS.underline:
-      return editor.can().chain().focus().toggleUnderline().run()
-    case EDITOR_ACTIONS.image:
-      return true
-    case EDITOR_ACTIONS.insertTable:
-      return editor
-        .can()
-        .chain()
-        .focus()
-        .insertTable({ rows: 3, cols: 3 })
-        .run()
-    case EDITOR_ACTIONS.addColumnBefore:
-      return editor.can().chain().focus().addColumnBefore().run()
-    case EDITOR_ACTIONS.addColumnAfter:
-      return editor.can().chain().focus().addColumnAfter().run()
-    case EDITOR_ACTIONS.deleteColumn:
-      return editor.can().chain().focus().deleteColumn().run()
-    case EDITOR_ACTIONS.addRowBefore:
-      return editor.can().chain().focus().addRowBefore().run()
-    case EDITOR_ACTIONS.addRowAfter:
-      return editor.can().chain().focus().addRowAfter().run()
-    case EDITOR_ACTIONS.deleteRow:
-      return editor.can().chain().focus().deleteRow().run()
-    case EDITOR_ACTIONS.deleteTable:
-      return editor.can().chain().focus().deleteTable().run()
-    case EDITOR_ACTIONS.mergeCells:
-      return editor.can().chain().focus().mergeCells().run()
-    case EDITOR_ACTIONS.splitCell:
-      return editor.can().chain().focus().splitCell().run()
-    case EDITOR_ACTIONS.toggleHeaderColumn:
-      return editor.can().chain().focus().toggleHeaderColumn().run()
-    case EDITOR_ACTIONS.toggleHeaderRow:
-      return editor.can().chain().focus().toggleHeaderRow().run()
-    case EDITOR_ACTIONS.toggleHeaderCell:
-      return editor.can().chain().focus().toggleHeaderCell().run()
-    case EDITOR_ACTIONS.mergeOrSplit:
-      return editor.can().chain().focus().mergeOrSplit().run()
-    case EDITOR_ACTIONS.goToNextCell:
-      return editor.can().chain().focus().goToNextCell().run()
-    case EDITOR_ACTIONS.goToPreviousCell:
-      return editor.can().chain().focus().goToPreviousCell().run()
-    case EDITOR_ACTIONS.taskList:
-      return editor.can().chain().focus().toggleTaskList().run()
-    case EDITOR_ACTIONS.highlight:
-      return editor.can().chain().focus().toggleHighlight().run()
-    case EDITOR_ACTIONS.setLink:
-      return true
-    case EDITOR_ACTIONS.unsetLink:
-      return editor.isActive("link")
-    default:
-      return true
-  }
-}
-
-export function executeEditorAction(
-  editor: Editor | null,
-  action: EditorAction,
-  options: Record<string, unknown> = {}
-): void {
-  if (!editor) return
-
-  switch (action) {
-    case EDITOR_ACTIONS.undo:
-      editor.chain().focus().undo().run()
-      break
-    case EDITOR_ACTIONS.redo:
-      editor.chain().focus().redo().run()
-      break
-    case EDITOR_ACTIONS.text:
-      editor.chain().focus().setParagraph().run()
-      break
-    case EDITOR_ACTIONS.heading1:
-      editor.chain().focus().setHeading({ level: 1 }).run()
-      break
-    case EDITOR_ACTIONS.heading2:
-      editor.chain().focus().setHeading({ level: 2 }).run()
-      break
-    case EDITOR_ACTIONS.heading3:
-      editor.chain().focus().setHeading({ level: 3 }).run()
-      break
-    case EDITOR_ACTIONS.heading4:
-      editor.chain().focus().setHeading({ level: 4 }).run()
-      break
-    case EDITOR_ACTIONS.heading5:
-      editor.chain().focus().setHeading({ level: 5 }).run()
-      break
-    case EDITOR_ACTIONS.heading6:
-      editor.chain().focus().setHeading({ level: 6 }).run()
-      break
-    case EDITOR_ACTIONS.codeBlock:
-      editor.chain().focus().toggleCodeBlock().run()
-      break
-    case EDITOR_ACTIONS.divider:
-      editor.chain().focus().setHorizontalRule().run()
-      break
-    case EDITOR_ACTIONS.bold:
-      editor.chain().focus().toggleBold().run()
-      break
-    case EDITOR_ACTIONS.italic:
-      editor.chain().focus().toggleItalic().run()
-      break
-    case EDITOR_ACTIONS.strike:
-      editor.chain().focus().toggleStrike().run()
-      break
-    case EDITOR_ACTIONS.code:
-      editor.chain().focus().toggleCode().run()
-      break
-    case EDITOR_ACTIONS.blockquote:
-      editor.chain().focus().setBlockquote().run()
-      break
-    case EDITOR_ACTIONS.bulletList:
-      editor.chain().focus().toggleBulletList().run()
-      break
-    case EDITOR_ACTIONS.orderedList:
-      editor.chain().focus().toggleOrderedList().run()
-      break
-    case EDITOR_ACTIONS.left:
-      editor.chain().focus().setTextAlign("left").run()
-      break
-    case EDITOR_ACTIONS.center:
-      editor.chain().focus().setTextAlign("center").run()
-      break
-    case EDITOR_ACTIONS.right:
-      editor.chain().focus().setTextAlign("right").run()
-      break
-    case EDITOR_ACTIONS.justify:
-      editor.chain().focus().setTextAlign("justify").run()
-      break
-    case EDITOR_ACTIONS.underline:
-      editor.chain().focus().toggleUnderline().run()
-      break
-    case EDITOR_ACTIONS.image:
-      editor
-        .chain()
-        .focus()
-        .setImage({
-          src: options.src as string,
-          alt: options.alt as string,
-          title: options.title as string,
-        })
-        .run()
-      break
-    case EDITOR_ACTIONS.insertTable:
-      editor
-        .chain()
-        .focus()
-        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-        .run()
-      break
-    case EDITOR_ACTIONS.addColumnBefore:
-      editor.chain().focus().addColumnBefore().run()
-      break
-    case EDITOR_ACTIONS.addColumnAfter:
-      editor.chain().focus().addColumnAfter().run()
-      break
-    case EDITOR_ACTIONS.deleteColumn:
-      editor.chain().focus().deleteColumn().run()
-      break
-    case EDITOR_ACTIONS.addRowBefore:
-      editor.chain().focus().addRowBefore().run()
-      break
-    case EDITOR_ACTIONS.addRowAfter:
-      editor.chain().focus().addRowAfter().run()
-      break
-    case EDITOR_ACTIONS.deleteRow:
-      editor.chain().focus().deleteRow().run()
-      break
-    case EDITOR_ACTIONS.deleteTable:
-      editor.chain().focus().deleteTable().run()
-      break
-    case EDITOR_ACTIONS.mergeCells:
-      editor.chain().focus().mergeCells().run()
-      break
-    case EDITOR_ACTIONS.splitCell:
-      editor.chain().focus().splitCell().run()
-      break
-    case EDITOR_ACTIONS.toggleHeaderColumn:
-      editor.chain().focus().toggleHeaderColumn().run()
-      break
-    case EDITOR_ACTIONS.toggleHeaderRow:
-      editor.chain().focus().toggleHeaderRow().run()
-      break
-    case EDITOR_ACTIONS.toggleHeaderCell:
-      editor.chain().focus().toggleHeaderCell().run()
-      break
-    case EDITOR_ACTIONS.mergeOrSplit:
-      editor.chain().focus().mergeOrSplit().run()
-      break
-    case EDITOR_ACTIONS.goToNextCell:
-      editor.chain().focus().goToNextCell().run()
-      break
-    case EDITOR_ACTIONS.goToPreviousCell:
-      editor.chain().focus().goToPreviousCell().run()
-      break
-    case EDITOR_ACTIONS.taskList:
-      editor.chain().focus().toggleTaskList().run()
-      break
-    case EDITOR_ACTIONS.highlight:
-      editor.chain().focus().toggleHighlight().run()
-      break
-    case EDITOR_ACTIONS.unsetLink:
-      editor.chain().focus().unsetLink().run()
-      break
-  }
-}
-
-export function getActiveEditorActions(editor: Editor | null): EditorAction[] {
-  if (!editor) return [EDITOR_ACTIONS.text]
-
-  const keys: Set<EditorAction> = new Set()
-
-  if (editor.isActive("heading")) {
-    const headingLevel = editor.getAttributes("heading").level
-    const headingMap = `heading${headingLevel}` as EditorAction
-    if (EDITOR_BLOCKS_MAP.has(headingMap)) {
-      keys.add(headingMap)
-    }
-  }
-
-  EDITOR_BLOCKS_MAP.forEach((block) => {
-    if (EDITOR_TEXT_ALIGN_ACTIONS.includes(block.key)) {
-      if (editor.isActive({ textAlign: block.key })) {
-        keys.add(block.key)
-      }
-    } else if (editor.isActive(block.key)) {
-      keys.add(block.key)
-    }
-  })
-
-  // Paragraph (text) has lowest priority - if any other block is active, hide paragraph
-  if (keys.size > 1 && keys.has(EDITOR_ACTIONS.text)) {
-    keys.delete(EDITOR_ACTIONS.text)
-  }
-
-  return keys.size > 0 ? Array.from(keys) : [EDITOR_ACTIONS.text]
-}
-
-// =============================================================================
 // EditorProvider
 // =============================================================================
 
@@ -858,12 +217,20 @@ export interface EditorProviderProps
   extends React.PropsWithChildren, Omit<UseEditorOptions, "extensions"> {
   content?: string
   extensions?: EditorExtensionInput[]
+  registry?: EditorActionRegistry<Editor>
   className?: string
 }
 
 const EditorProvider = React.forwardRef<HTMLDivElement, EditorProviderProps>(
   (
-    { content, extensions = [], children, className, ...editorOptions },
+    {
+      content,
+      extensions = [],
+      registry = defaultEditorRegistry,
+      children,
+      className,
+      ...editorOptions
+    },
     ref
   ) => {
     const { extensions: extractedExtensions, bubbleMenus } = React.useMemo(
@@ -878,8 +245,8 @@ const EditorProvider = React.forwardRef<HTMLDivElement, EditorProviderProps>(
     })
 
     const contextValue = React.useMemo<EditorContextValue>(
-      () => ({ editor }),
-      [editor]
+      () => ({ editor, registry }),
+      [editor, registry]
     )
 
     return (
@@ -1017,7 +384,7 @@ const EditorToolbarGroup = EditorButtonGroup
 // =============================================================================
 
 export interface EditorButtonProps extends React.ComponentProps<typeof Button> {
-  action: EditorAction
+  action: string
   activeVariant?: "default" | "secondary" | "outline"
 }
 
@@ -1026,7 +393,7 @@ const EditorButton = React.forwardRef<HTMLButtonElement, EditorButtonProps>(
     { action, activeVariant = "secondary", className, children, ...props },
     ref
   ) => {
-    const { editor } = useEditor()
+    const { editor, registry } = useEditor()
     const [updateKey, forceUpdate] = React.useReducer((x) => x + 1, 0)
 
     React.useEffect(() => {
@@ -1041,21 +408,17 @@ const EditorButton = React.forwardRef<HTMLButtonElement, EditorButtonProps>(
     }, [editor])
 
     const isActive = React.useMemo(() => {
-      if (!editor) return false
-      if (EDITOR_TEXT_ALIGN_ACTIONS.includes(action)) {
-        return editor.isActive({ textAlign: action })
-      }
-      return editor.isActive(action)
+      return registry.isActive(editor, action)
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [editor, action, updateKey])
+    }, [editor, registry, action, updateKey])
 
-    const canUse = canUseEditorAction(editor, action)
+    const canUse = registry.canExecute(editor, action)
 
     const handleClick = () => {
-      executeEditorAction(editor, action)
+      registry.execute(editor, action)
     }
 
-    const block = EDITOR_BLOCKS_MAP.get(action)
+    const config = registry.get(action)
 
     if (!editor) return null
 
@@ -1067,7 +430,7 @@ const EditorButton = React.forwardRef<HTMLButtonElement, EditorButtonProps>(
         size="icon"
         disabled={!canUse}
         onClick={handleClick}
-        aria-label={block?.label}
+        aria-label={config?.label}
         className={cn("size-8", className)}
         {...props}
       >
@@ -1108,7 +471,7 @@ EditorSeparator.displayName = "EditorSeparator"
 // =============================================================================
 
 interface EditorDropdownContextValue {
-  sharedBlocks: EditorBlock[]
+  sharedConfigs: EditorActionConfig<Editor>[]
 }
 
 const EditorDropdownContext =
@@ -1121,24 +484,24 @@ const EditorDropdownContext =
 export interface EditorDropdownProps extends React.ComponentProps<
   typeof DropdownMenu
 > {
-  actions: EditorAction[]
+  actions: string[]
 }
 
 const EditorDropdown = React.forwardRef<HTMLButtonElement, EditorDropdownProps>(
   ({ actions, children, ...props }, _ref) => {
-    const { editor } = useEditor()
+    const { editor, registry } = useEditor()
 
-    const handleChangeBlock = (key: EditorAction) => {
-      executeEditorAction(editor, key)
+    const handleChangeAction = (key: string) => {
+      registry.execute(editor, key)
     }
 
-    const filteredBlocks = actions
-      .map((action) => EDITOR_BLOCKS_MAP.get(action)!)
-      .filter(Boolean)
+    const filteredConfigs = actions
+      .map((action) => registry.get(action))
+      .filter((c): c is EditorActionConfig<Editor> => Boolean(c))
 
     const contextValue = React.useMemo<EditorDropdownContextValue>(
-      () => ({ sharedBlocks: filteredBlocks }),
-      [filteredBlocks]
+      () => ({ sharedConfigs: filteredConfigs }),
+      [filteredConfigs]
     )
 
     if (!editor) return null
@@ -1160,30 +523,34 @@ const EditorDropdown = React.forwardRef<HTMLButtonElement, EditorDropdownProps>(
           <DropdownMenuContent className="pb-2">
             <ScrollArea
               style={{
-                height: Math.min(filteredBlocks.length * 56, 300),
+                height: Math.min(filteredConfigs.length * 56, 300),
               }}
               className="max-h-[300px] overflow-auto"
             >
-              {filteredBlocks.map((item) => (
+              {filteredConfigs.map((item) => (
                 <DropdownMenuItem
-                  key={item.label}
-                  onClick={() => handleChangeBlock(item.key)}
+                  key={item.key}
+                  onClick={() => handleChangeAction(item.key)}
                 >
                   <div
                     className="border-border bg-background flex size-8 items-center justify-center rounded-lg border"
                     aria-hidden="true"
                   >
-                    <item.icon
-                      size={16}
-                      strokeWidth={2}
-                      className="opacity-60"
-                    />
+                    {item.icon && (
+                      <item.icon
+                        size={16}
+                        strokeWidth={2}
+                        className="opacity-60"
+                      />
+                    )}
                   </div>
                   <div>
                     <div className="text-sm font-medium">{item.label}</div>
-                    <div className="text-muted-foreground text-xs">
-                      {item.description}
-                    </div>
+                    {item.description && (
+                      <div className="text-muted-foreground text-xs">
+                        {item.description}
+                      </div>
+                    )}
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -1201,70 +568,70 @@ EditorDropdown.displayName = "EditorDropdown"
 // =============================================================================
 
 export interface EditorLabelProps extends React.ComponentProps<"span"> {
-  action?: EditorAction
+  action?: string
   pattern?: ":icon :label" | ":label" | ":label :icon" | ":icon"
 }
 
 const EditorLabel = React.forwardRef<HTMLSpanElement, EditorLabelProps>(
   ({ className, action, pattern = ":label", ...props }, ref) => {
     const dropdownCtx = React.useContext(EditorDropdownContext)
-    const { editor } = useEditor()
+    const { editor, registry } = useEditor()
 
     const activeActions =
       useEditorState({
         editor,
-        selector: ({ editor: e }) => getActiveEditorActions(e),
+        selector: ({ editor: e }) => (e ? registry.getActiveKeys(e) : []),
       }) ?? []
 
-    const blocks = React.useMemo(() => {
+    const configs = React.useMemo(() => {
       if (action) {
-        const block = EDITOR_BLOCKS_MAP.get(action)
-        return block ? [block] : []
+        const config = registry.get(action)
+        return config ? [config] : []
       }
 
-      const filteredActions = dropdownCtx?.sharedBlocks?.length
+      const filteredActions = dropdownCtx?.sharedConfigs?.length
         ? activeActions.filter((a) =>
-            dropdownCtx.sharedBlocks.some((b) => b.key === a)
+            dropdownCtx.sharedConfigs.some((c) => c.key === a)
           )
         : activeActions
 
       return filteredActions
-        .map((key) => EDITOR_BLOCKS_MAP.get(key)!)
-        .filter(Boolean)
-    }, [action, activeActions, dropdownCtx])
+        .map((key) => registry.get(key))
+        .filter((c): c is EditorActionConfig<Editor> => Boolean(c))
+    }, [action, activeActions, dropdownCtx, registry])
 
-    const renderBlock = (block: EditorBlock) => {
+    const renderConfig = (config: EditorActionConfig<Editor>) => {
       switch (pattern) {
         case ":icon :label":
           return (
-            <React.Fragment key={block.key}>
-              <block.icon className="size-4" />
-              {block.label}
+            <React.Fragment key={config.key}>
+              {config.icon && <config.icon className="size-4" />}
+              {config.label}
             </React.Fragment>
           )
         case ":icon":
           return (
-            <React.Fragment key={block.key}>
-              <block.icon className="size-4" />
+            <React.Fragment key={config.key}>
+              {config.icon && <config.icon className="size-4" />}
             </React.Fragment>
           )
         case ":label :icon":
           return (
-            <React.Fragment key={block.key}>
-              {block.label}
-              <block.icon className="size-4" />
+            <React.Fragment key={config.key}>
+              {config.label}
+              {config.icon && <config.icon className="size-4" />}
             </React.Fragment>
           )
         default:
-          return block.label
+          return config.label
       }
     }
 
     const content =
-      blocks.length > 0
-        ? blocks.map(renderBlock)
-        : dropdownCtx?.sharedBlocks?.[0]
-          ? renderBlock(dropdownCtx.sharedBlocks[0])
+      configs.length > 0
+        ? configs.map(renderConfig)
+        : dropdownCtx?.sharedConfigs?.[0]
+          ? renderConfig(dropdownCtx.sharedConfigs[0])
           : null
 
     return (
@@ -1403,7 +770,7 @@ export interface EditorBubbleMenuButtonProps extends Omit<
   React.ComponentProps<typeof Button>,
   "onClick"
 > {
-  action?: EditorAction
+  action?: string
   isActive?: boolean
   onAction?: () => void
 }
@@ -1416,7 +783,7 @@ const EditorBubbleMenuButton = React.forwardRef<
     { action, isActive: isActiveProp, onAction, className, children, ...props },
     ref
   ) => {
-    const { editor } = useEditor()
+    const { editor, registry } = useEditor()
     const [updateKey, forceUpdate] = React.useReducer((x) => x + 1, 0)
 
     React.useEffect(() => {
@@ -1431,13 +798,10 @@ const EditorBubbleMenuButton = React.forwardRef<
     }, [editor])
 
     const isActiveFromAction = React.useMemo(() => {
-      if (!editor || !action) return false
-      if (EDITOR_TEXT_ALIGN_ACTIONS.includes(action)) {
-        return editor.isActive({ textAlign: action })
-      }
-      return editor.isActive(action)
+      if (!action) return false
+      return registry.isActive(editor, action)
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [editor, action, updateKey])
+    }, [editor, registry, action, updateKey])
 
     const isActive = isActiveProp ?? isActiveFromAction
 
@@ -1447,12 +811,12 @@ const EditorBubbleMenuButton = React.forwardRef<
         return
       }
       if (action) {
-        executeEditorAction(editor, action)
+        registry.execute(editor, action)
       }
     }
 
-    const block = action ? EDITOR_BLOCKS_MAP.get(action) : undefined
-    const canUse = action ? canUseEditorAction(editor, action) : true
+    const config = action ? registry.get(action) : undefined
+    const canUse = action ? registry.canExecute(editor, action) : true
 
     if (!editor) return null
 
@@ -1464,7 +828,7 @@ const EditorBubbleMenuButton = React.forwardRef<
         size="sm"
         disabled={!canUse}
         onClick={handleClick}
-        aria-label={block?.label}
+        aria-label={config?.label}
         className={cn("h-7 w-7 p-0", className)}
         {...props}
       >
@@ -1939,21 +1303,17 @@ EditorBubbleMenuFormCancel.displayName = "EditorBubbleMenuFormCancel"
 // Hooks
 // =============================================================================
 
-export function useEditorIsActive(action: EditorAction): boolean {
-  const { editor } = useEditor()
+export function useEditorIsActive(action: string): boolean {
+  const { editor, registry } = useEditor()
 
   return React.useMemo(() => {
-    if (!editor) return false
-    if (EDITOR_TEXT_ALIGN_ACTIONS.includes(action)) {
-      return editor.isActive({ textAlign: action })
-    }
-    return editor.isActive(action)
-  }, [editor, action])
+    return registry.isActive(editor, action)
+  }, [editor, registry, action])
 }
 
-export function useEditorCurrentActions(): EditorAction[] {
-  const { editor } = useEditor()
-  return React.useMemo(() => getActiveEditorActions(editor), [editor])
+export function useEditorCurrentActions(): string[] {
+  const { editor, registry } = useEditor()
+  return React.useMemo(() => registry.getActiveKeys(editor), [editor, registry])
 }
 
 export function toLatentArray<T>(...inputs: NestedArray<T>[]): T[] {
@@ -2008,4 +1368,12 @@ export {
   EditorSeparator,
   EditorToolbar,
   EditorToolbarGroup,
+}
+
+// Re-export from editor-registry
+export {
+  createEditorRegistry,
+  defaultEditorRegistry,
+  EditorActionRegistry,
+  type EditorActionConfig,
 }
