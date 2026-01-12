@@ -19,9 +19,6 @@ import {
   type EditorActionConfig,
 } from "./editor-registry"
 
-import { TextAlign } from "@tiptap/extension-text-align"
-import TiptapTypography from "@tiptap/extension-typography"
-import TiptapUnderline from "@tiptap/extension-underline"
 import {
   BubbleMenu,
   Editor,
@@ -32,29 +29,9 @@ import {
   useEditor as useTiptapEditor,
   type UseEditorOptions,
 } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
 import { Check, ChevronDown, Link2Off } from "lucide-react"
 import { EditorBubbleMenuLink } from "./editor-link"
 import { EDITOR_PLACEHOLDER_CLASSES } from "./editor-placeholder"
-
-// =============================================================================
-// Default Extensions
-// =============================================================================
-
-export const defaultExtensions = [
-  StarterKit.configure({
-    codeBlock: false, // Use CodeBlock extension separately
-  }),
-  TiptapUnderline.configure({
-    HTMLAttributes: {
-      class: "underline underline-offset-4",
-    },
-  }),
-  TextAlign.configure({
-    types: ["heading", "paragraph", "blockquote", "bulletList", "orderedList"],
-  }),
-  TiptapTypography.configure({}),
-]
 
 type NestedArray<T> = T | NestedArray<T>[]
 
@@ -240,7 +217,7 @@ const EditorProvider = React.forwardRef<HTMLDivElement, EditorProviderProps>(
 
     const editor = useTiptapEditor({
       content,
-      extensions: toLatentArray(defaultExtensions, extractedExtensions),
+      extensions: toLatentArray(extractedExtensions),
       ...editorOptions,
     })
 

@@ -27,6 +27,7 @@ import {
 } from "@/registry/editor/editor"
 
 import { EditorCodeBlockExtension } from "@/registry/editor/editor-code-block"
+import { EditorEssentialExtension } from "@/registry/editor/editor-essential"
 import { EditorHighlightExtension } from "@/registry/editor/editor-highlight"
 import { EditorImageExtension } from "@/registry/editor/editor-image"
 import { EditorLinkExtensions } from "@/registry/editor/editor-link"
@@ -83,6 +84,8 @@ export default function EditorDemo() {
       <EditorProvider
         content={INITIAL_CONTENT}
         extensions={[
+          EditorEssentialExtension,
+
           EditorTaskListExtensions,
 
           EditorPlaceholderExtension,

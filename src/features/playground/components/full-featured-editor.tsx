@@ -16,7 +16,6 @@
 import type { Editor } from "@tiptap/react"
 
 import {
-  defaultEditorRegistry,
   EditorBubbleMenu,
   EditorBubbleMenuButton,
   EditorBubbleMenuContent,
@@ -48,6 +47,7 @@ import { EditorCodeBlockExtension } from "@/registry/editor/editor-code-block"
 
 import { EditorSlashMenuExtension } from "@/registry/editor/editor-slash-menu"
 
+import { EditorEssentialExtension } from "@/registry/editor/editor-essential"
 import { EditorHighlightExtension } from "@/registry/editor/editor-highlight"
 import { EditorLinkExtensions } from "@/registry/editor/editor-link"
 import { EditorPlaceholderExtension } from "@/registry/editor/editor-placeholder"
@@ -117,6 +117,8 @@ export function FullFeaturedEditor({
     <EditorProvider
       content={content}
       extensions={[
+        EditorEssentialExtension,
+
         EditorLinkExtensions,
 
         EditorTaskListExtensions,
