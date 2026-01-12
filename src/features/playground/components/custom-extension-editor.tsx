@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/popover"
 
 import { CheckCheck, Languages, Loader2, Sparkles, Wand2 } from "lucide-react"
+import { EditorEssentialExtension } from "@/registry/editor/editor-essential"
 
 // =============================================================================
 // Custom "Ask AI" Extension
@@ -248,6 +249,8 @@ export function CustomExtensionEditor({
     <EditorProvider
       content="<p>Select some text and click 'Ask AI' to see the custom extension in action.</p><p>Or type <code>/</code> and search for 'AI' to see custom slash menu items.</p>"
       extensions={[
+        EditorEssentialExtension,
+
         // Custom AI extension
         AskAIExtension.configure({
           onAskAI:

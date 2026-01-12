@@ -18,6 +18,7 @@ import { EditorImageExtension } from "@/registry/editor/editor-image"
 import { EditorTableExtensions } from "@/registry/editor/editor-table"
 
 import { EditorCodeBlockExtension } from "@/registry/editor/editor-code-block"
+import { EditorEssentialExtension } from "@/registry/editor/editor-essential"
 
 interface ReadOnlyViewerProps {
   content: string
@@ -30,6 +31,7 @@ export function ReadOnlyViewer({ content, className }: ReadOnlyViewerProps) {
       content={content}
       editable={false}
       extensions={[
+        EditorEssentialExtension,
         EditorImageExtension,
         EditorTableExtensions,
         EditorCodeBlockExtension,
