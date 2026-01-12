@@ -48,6 +48,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "src/registry/editor/editor-essential.tsx",
+          "type": "registry:ui"
+        },
+        {
           "path": "src/registry/editor/editor-highlight.tsx",
           "type": "registry:ui"
         },
