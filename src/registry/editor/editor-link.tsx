@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "@tiptap/extension-link"
-import { BubbleMenu } from "@tiptap/react"
+import { BubbleMenu, type Editor } from "@tiptap/react"
 import { EditorContext, createEditorExtension } from "./editor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -162,4 +162,29 @@ EditorBubbleMenuLink.displayName = "EditorBubbleMenuLink"
 export const EditorLinkExtensions = createEditorExtension({
   extension: EditorLinkExtension,
   bubbleMenu: EditorBubbleMenuLink,
+  commands: [
+    {
+      key: "setLink",
+      icon: Link2,
+      label: "Add Link",
+      description: "Insert a hyperlink",
+      execute: (editor: Editor, options) =>
+        editor
+          .chain()
+          .focus()
+          .setLink({ href: options?.href as string })
+          .run(),
+      canExecute: () => true,
+      isActive: (editor: Editor) => editor.isActive("link"),
+    },
+    {
+      key: "unsetLink",
+      icon: Link2Off,
+      label: "Remove Link",
+      description: "Remove the hyperlink",
+      execute: (editor: Editor) => editor.chain().focus().unsetLink().run(),
+      canExecute: (editor: Editor) => editor.isActive("link"),
+      isActive: (editor: Editor) => editor.isActive("link"),
+    },
+  ],
 })

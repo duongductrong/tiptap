@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import type { Editor } from "@tiptap/react"
 import { Extension } from "@tiptap/core"
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
 import { BubbleMenu } from "@tiptap/react"
@@ -95,6 +96,18 @@ const EditorCodeBlockNode = Extension.create({
 export const EditorCodeBlockExtension = createEditorExtension({
   extension: EditorCodeBlockNode,
   bubbleMenu: EditorBubbleMenuCodeBlock,
+  commands: [
+    {
+      key: "codeBlock",
+      icon: Code2,
+      label: "Code Block",
+      description: "Add a code block",
+      execute: (editor) => editor.chain().focus().toggleCodeBlock().run(),
+      canExecute: (editor) =>
+        editor.can().chain().focus().toggleCodeBlock().run(),
+      isActive: (editor) => editor.isActive("codeBlock"),
+    },
+  ],
 })
 
 // =============================================================================

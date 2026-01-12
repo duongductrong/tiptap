@@ -848,6 +848,25 @@ const EditorImageNode = Node.create<EditorImageOptions>({
 export const EditorImageExtension = createEditorExtension<EditorImageOptions>({
   extension: EditorImageNode,
   bubbleMenu: EditorBubbleMenuImage,
+  commands: [
+    {
+      key: "image",
+      icon: ImageUp,
+      label: "Image",
+      description: "Upload or embed an image",
+      execute: (editor, options) =>
+        editor
+          .chain()
+          .focus()
+          .setImage({
+            src: options?.src as string,
+            alt: options?.alt as string,
+            title: options?.title as string,
+          })
+          .run(),
+      canExecute: () => true,
+    },
+  ],
   onConfigure: (options, current) => ({
     ...current,
     extension: EditorImageNode.configure(options),

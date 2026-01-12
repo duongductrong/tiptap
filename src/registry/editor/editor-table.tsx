@@ -12,7 +12,8 @@ import { Table } from "@tiptap/extension-table"
 import { TableCell } from "@tiptap/extension-table-cell"
 import { TableHeader } from "@tiptap/extension-table-header"
 import { TableRow } from "@tiptap/extension-table-row"
-import { BubbleMenu, useEditorState } from "@tiptap/react"
+import { BubbleMenu, useEditorState, type Editor } from "@tiptap/react"
+import { Table as TableIcon } from "lucide-react"
 import {
   AlignCenter,
   AlignLeft,
@@ -161,6 +162,133 @@ export const EditorTableExtensions = createEditorExtension({
     EditorTableCellExtension,
   ],
   bubbleMenu: EditorBubbleMenuTable,
+  commands: [
+    {
+      key: "insertTable",
+      icon: TableIcon,
+      label: "Insert Table",
+      description: "Insert a new table",
+      execute: (editor: Editor) =>
+        editor
+          .chain()
+          .focus()
+          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+          .run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().insertTable({ rows: 3, cols: 3 }).run(),
+    },
+    {
+      key: "addColumnBefore",
+      label: "Add Column Before",
+      execute: (editor: Editor) =>
+        editor.chain().focus().addColumnBefore().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().addColumnBefore().run(),
+    },
+    {
+      key: "addColumnAfter",
+      label: "Add Column After",
+      execute: (editor: Editor) =>
+        editor.chain().focus().addColumnAfter().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().addColumnAfter().run(),
+    },
+    {
+      key: "deleteColumn",
+      label: "Delete Column",
+      execute: (editor: Editor) => editor.chain().focus().deleteColumn().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().deleteColumn().run(),
+    },
+    {
+      key: "addRowBefore",
+      label: "Add Row Before",
+      execute: (editor: Editor) => editor.chain().focus().addRowBefore().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().addRowBefore().run(),
+    },
+    {
+      key: "addRowAfter",
+      label: "Add Row After",
+      execute: (editor: Editor) => editor.chain().focus().addRowAfter().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().addRowAfter().run(),
+    },
+    {
+      key: "deleteRow",
+      label: "Delete Row",
+      execute: (editor: Editor) => editor.chain().focus().deleteRow().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().deleteRow().run(),
+    },
+    {
+      key: "deleteTable",
+      label: "Delete Table",
+      execute: (editor: Editor) => editor.chain().focus().deleteTable().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().deleteTable().run(),
+    },
+    {
+      key: "mergeCells",
+      label: "Merge Cells",
+      execute: (editor: Editor) => editor.chain().focus().mergeCells().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().mergeCells().run(),
+    },
+    {
+      key: "splitCell",
+      label: "Split Cell",
+      execute: (editor: Editor) => editor.chain().focus().splitCell().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().splitCell().run(),
+    },
+    {
+      key: "toggleHeaderColumn",
+      label: "Toggle Header Column",
+      execute: (editor: Editor) =>
+        editor.chain().focus().toggleHeaderColumn().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().toggleHeaderColumn().run(),
+    },
+    {
+      key: "toggleHeaderRow",
+      label: "Toggle Header Row",
+      execute: (editor: Editor) =>
+        editor.chain().focus().toggleHeaderRow().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().toggleHeaderRow().run(),
+    },
+    {
+      key: "toggleHeaderCell",
+      label: "Toggle Header Cell",
+      execute: (editor: Editor) =>
+        editor.chain().focus().toggleHeaderCell().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().toggleHeaderCell().run(),
+    },
+    {
+      key: "mergeOrSplit",
+      label: "Merge or Split",
+      execute: (editor: Editor) => editor.chain().focus().mergeOrSplit().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().mergeOrSplit().run(),
+    },
+    {
+      key: "goToNextCell",
+      label: "Go to Next Cell",
+      execute: (editor: Editor) => editor.chain().focus().goToNextCell().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().goToNextCell().run(),
+    },
+    {
+      key: "goToPreviousCell",
+      label: "Go to Previous Cell",
+      execute: (editor: Editor) =>
+        editor.chain().focus().goToPreviousCell().run(),
+      canExecute: (editor: Editor) =>
+        editor.can().chain().focus().goToPreviousCell().run(),
+    },
+  ],
 })
 
 // =============================================================================

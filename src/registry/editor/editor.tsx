@@ -13,13 +13,6 @@ import { cn } from "@/lib/utils"
 import * as React from "react"
 
 import {
-  createEditorRegistry,
-  defaultEditorRegistry,
-  EditorActionRegistry,
-  type EditorActionConfig,
-} from "./editor-registry"
-
-import {
   BubbleMenu,
   Editor,
   Extensions,
@@ -35,6 +28,127 @@ import { EDITOR_PLACEHOLDER_CLASSES } from "./editor-placeholder"
 
 type NestedArray<T> = T | NestedArray<T>[]
 
+// =============================================================================
+// Types
+// =============================================================================
+
+export interface EditorActionConfig<TEditor = unknown> {
+  key: string
+  icon?: React.ElementType
+  label: string
+  description?: string
+  execute: (editor: TEditor, options?: Record<string, unknown>) => void
+  canExecute?: (editor: TEditor) => boolean
+  isActive?: (editor: TEditor) => boolean
+}
+
+// =============================================================================
+// EditorActionRegistry
+// =============================================================================
+
+export class EditorActionRegistry<TEditor = unknown> {
+  private actions = new Map<string, EditorActionConfig<TEditor>>()
+
+  register(config: EditorActionConfig<TEditor>): this {
+    this.actions.set(config.key, config)
+    return this
+  }
+
+  registerMany(configs: EditorActionConfig<TEditor>[]): this {
+    for (const config of configs) {
+      this.register(config)
+    }
+    return this
+  }
+
+  unregister(key: string): this {
+    this.actions.delete(key)
+    return this
+  }
+
+  extend(registry: EditorActionRegistry<TEditor>): this {
+    for (const config of registry.values()) {
+      this.register(config)
+    }
+    return this
+  }
+
+  get(key: string): EditorActionConfig<TEditor> | undefined {
+    return this.actions.get(key)
+  }
+
+  has(key: string): boolean {
+    return this.actions.has(key)
+  }
+
+  keys(): string[] {
+    return Array.from(this.actions.keys())
+  }
+
+  values(): EditorActionConfig<TEditor>[] {
+    return Array.from(this.actions.values())
+  }
+
+  size(): number {
+    return this.actions.size
+  }
+
+  execute(
+    editor: TEditor | null,
+    key: string,
+    options?: Record<string, unknown>
+  ): void {
+    if (!editor) return
+    const action = this.get(key)
+    action?.execute(editor, options)
+  }
+
+  canExecute(editor: TEditor | null, key: string): boolean {
+    if (!editor) return false
+    const action = this.get(key)
+    return action?.canExecute?.(editor) ?? true
+  }
+
+  isActive(editor: TEditor | null, key: string): boolean {
+    if (!editor) return false
+    const action = this.get(key)
+    return action?.isActive?.(editor) ?? false
+  }
+
+  getActiveKeys(editor: TEditor | null): string[] {
+    if (!editor) return []
+    return this.keys().filter((key) => this.isActive(editor, key))
+  }
+}
+
+// =============================================================================
+// Factory
+// =============================================================================
+
+export function createEditorRegistry<
+  TEditor = unknown,
+>(): EditorActionRegistry<TEditor> {
+  return new EditorActionRegistry<TEditor>()
+}
+
+/**
+ * Default empty registry. Commands are now registered via the `commands`
+ * property in `createEditorExtension()`. This empty registry serves as the
+ * base that extension commands are merged into.
+ *
+ * @example
+ * ```tsx
+ * // Extensions now define their own commands inline:
+ * const MyExtension = createEditorExtension({
+ *   extension: SomeTiptapExtension,
+ *   commands: [
+ *     { key: "myAction", label: "My Action", execute: (editor) => {...} }
+ *   ],
+ * })
+ * ```
+ */
+export const defaultEditorRegistry = createEditorRegistry<Editor>()
+
 export type EditorExtensions = NestedArray<Extensions[number]>
 
 export interface BubbleMenuComponentProps {
@@ -46,6 +160,7 @@ export interface EditorExtensionWithBubbleMenu<TConfig = unknown> {
   extension: EditorExtensions | EditorExtensions[]
   bubbleMenu?: React.ComponentType<BubbleMenuComponentProps>
   bubbleMenuProps?: BubbleMenuComponentProps
+  commands?: EditorActionConfig<Editor>[]
   configure: (
     options: Partial<TConfig>
   ) => EditorExtensionWithBubbleMenu<TConfig>
@@ -73,6 +188,7 @@ export interface CreateEditorExtensionOptions<TConfig = unknown> {
   bubbleMenu?: React.ComponentType<BubbleMenuComponentProps>
   bubbleMenuProps?: BubbleMenuComponentProps
   defaultConfig?: TConfig
+  commands?: EditorActionConfig<Editor>[]
   onConfigure?: (
     options: Partial<TConfig>,
     current: CreateEditorExtensionOptions<TConfig>
@@ -87,6 +203,7 @@ export function createEditorExtension<TConfig = unknown>(
     extension: options.extension,
     bubbleMenu: options.bubbleMenu,
     bubbleMenuProps: options.bubbleMenuProps,
+    commands: options.commands,
     configure(config: Partial<TConfig>) {
       if (options.onConfigure) {
         const newOptions = options.onConfigure(config, options)
@@ -134,12 +251,14 @@ function extractExtensionsAndBubbleMenus(inputs: EditorExtensionInput[]): {
     component: React.ComponentType<BubbleMenuComponentProps>
     props?: BubbleMenuComponentProps
   }>
+  commands: EditorActionConfig<Editor>[]
 } {
   const extensions: EditorExtensions[] = []
   const bubbleMenus: Array<{
     component: React.ComponentType<BubbleMenuComponentProps>
     props?: BubbleMenuComponentProps
   }> = []
+  const commands: EditorActionConfig<Editor>[] = []
 
   for (const input of inputs) {
     if (isEditorExtensionWithBubbleMenu(input)) {
@@ -155,6 +274,10 @@ function extractExtensionsAndBubbleMenus(inputs: EditorExtensionInput[]): {
           props: input.bubbleMenuProps,
         })
       }
+
+      if (input.commands) {
+        commands.push(...input.commands)
+      }
     } else if (Array.isArray(input)) {
       extensions.push(...input)
     } else {
@@ -162,7 +285,7 @@ function extractExtensionsAndBubbleMenus(inputs: EditorExtensionInput[]): {
     }
   }
 
-  return { extensions, bubbleMenus }
+  return { extensions, bubbleMenus, commands }
 }
 
 // =============================================================================
@@ -210,7 +333,11 @@ const EditorProvider = React.forwardRef<HTMLDivElement, EditorProviderProps>(
     },
     ref
   ) => {
-    const { extensions: extractedExtensions, bubbleMenus } = React.useMemo(
+    const {
+      extensions: extractedExtensions,
+      bubbleMenus,
+      commands: extractedCommands,
+    } = React.useMemo(
       () => extractExtensionsAndBubbleMenus(extensions),
       [extensions]
     )
@@ -221,9 +348,20 @@ const EditorProvider = React.forwardRef<HTMLDivElement, EditorProviderProps>(
       ...editorOptions,
     })
 
+    // Merge base registry with extension commands
+    const mergedRegistry = React.useMemo(() => {
+      if (extractedCommands.length === 0) {
+        return registry
+      }
+      const merged = createEditorRegistry<Editor>()
+      merged.extend(registry)
+      merged.registerMany(extractedCommands)
+      return merged
+    }, [registry, extractedCommands])
+
     const contextValue = React.useMemo<EditorContextValue>(
-      () => ({ editor, registry }),
-      [editor, registry]
+      () => ({ editor, registry: mergedRegistry }),
+      [editor, mergedRegistry]
     )
 
     return (
@@ -1345,12 +1483,4 @@ export {
   EditorSeparator,
   EditorToolbar,
   EditorToolbarGroup,
-}
-
-// Re-export from editor-registry
-export {
-  createEditorRegistry,
-  defaultEditorRegistry,
-  EditorActionRegistry,
-  type EditorActionConfig,
 }
