@@ -1,0 +1,316 @@
+# shadcn/editor
+
+> A beautiful rich text editor built on Tiptap, styled with Tailwind, works seamlessly with shadcn/ui.
+
+## Quick Start
+
+```tsx
+import {
+  EditorProvider,
+  EditorContent,
+  EditorToolbar,
+  EditorButton,
+} from "@/registry/editor/editor"
+import { EditorEssentialExtension } from "@/registry/editor/editor-essential"
+
+function MyEditor() {
+  return (
+    <EditorProvider
+      content="<p>Hello World</p>"
+      extensions={[EditorEssentialExtension]}
+    >
+      <EditorToolbar>
+        <EditorButton action="bold">B</EditorButton>
+        <EditorButton action="italic">I</EditorButton>
+      </EditorToolbar>
+      <EditorContent className="prose min-h-[300px] p-4" />
+    </EditorProvider>
+  )
+}
+```
+
+---
+
+## Architecture Overview
+
+### Core Components (editor.tsx)
+
+| Component | Purpose |
+|-----------|---------|
+| `EditorProvider` | Root component, manages editor instance and action registry |
+| `EditorContent` | Renders the editable content area |
+| `EditorToolbar` | Container for toolbar buttons |
+| `EditorButton` | Action button, auto-binds to registry via `action` prop |
+| `EditorButtonGroup` | Groups related buttons |
+| `EditorSeparator` | Visual separator between button groups |
+| `EditorDropdown` | Dropdown menu for block type selection |
+| `EditorLabel` | Displays active action's icon/label |
+| `EditorFloatingMenu` | Appears in empty paragraphs |
+| `EditorBubbleMenu` | Appears on text selection |
+
+### Bubble Menu Components
+
+| Component | Purpose |
+|-----------|---------|
+| `EditorBubbleMenu` | Container, use `shouldShow` prop to control visibility |
+| `EditorBubbleMenuContent` | Styled container for menu items |
+| `EditorBubbleMenuGroup` | Groups related buttons |
+| `EditorBubbleMenuButton` | Action button for bubble menu |
+| `EditorBubbleMenuSeparator` | Visual separator |
+| `EditorBubbleMenuPopover` | Nested popover for forms |
+| `EditorBubbleMenuPopoverTrigger` | Opens popover |
+| `EditorBubbleMenuPopoverContent` | Popover content container |
+| `EditorBubbleMenuForm` | Form with auto-submit on Enter |
+| `EditorBubbleMenuInput` | Input with `binding` prop for auto-fill |
+| `EditorBubbleMenuFormActions` | Container for submit/cancel buttons |
+| `EditorBubbleMenuFormSubmit` | Submit button |
+| `EditorBubbleMenuFormCancel` | Cancel button |
+
+---
+
+## Extension System
+
+### Creating Custom Extensions
+
+Use `createEditorExtension()` to create extensions with commands and bubble menus:
+
+```tsx
+import { createEditorExtension } from "@/registry/editor/editor"
+import { MyTiptapExtension } from "@tiptap/extension-my"
+
+export const MyExtension = createEditorExtension({
+  extension: MyTiptapExtension.configure({ /* options */ }),
+  
+  // Optional: custom bubble menu component
+  bubbleMenu: MyBubbleMenu,
+  
+  // Commands are auto-registered to EditorActionRegistry
+  commands: [
+    {
+      key: "myAction",           // Used in EditorButton action="myAction"
+      icon: MyIcon,              // Lucide icon component
+      label: "My Action",        // Display label
+      description: "Does something", // For dropdown menus
+      execute: (editor) => editor.chain().focus().doSomething().run(),
+      canExecute: (editor) => editor.can().doSomething(),
+      isActive: (editor) => editor.isActive("something"),
+    },
+  ],
+})
+```
+
+### Extension Configuration
+
+Extensions support `.configure()` for runtime options:
+
+```tsx
+<EditorProvider
+  extensions={[
+    EditorImageExtension.configure({
+      uploadStrategy: "base64",
+      maxFileSize: 10 * 1024 * 1024,
+    }),
+  ]}
+/>
+```
+
+---
+
+## Available Extensions
+
+### EditorEssentialExtension (editor-essential.tsx)
+
+**Required for most editors.** Includes StarterKit and basic formatting.
+
+**Registered Commands:**
+- `undo`, `redo` - History
+- `bold`, `italic`, `underline`, `strike`, `code` - Text formatting
+- `paragraph`, `heading1-6` - Block types
+- `bulletList`, `orderedList` - Lists
+- `blockquote`, `horizontalRule` - Block elements
+- `left`, `center`, `right`, `justify` - Text alignment
+
+### EditorLinkExtensions (editor-link.tsx)
+
+Hyperlink support with automatic bubble menu.
+
+**Commands:** `setLink`, `unsetLink`
+
+### EditorImageExtension (editor-image.tsx)
+
+Image upload with resize, alignment, and captions.
+
+**Commands:** `image`
+
+**Config options:**
+- `uploadStrategy`: "base64" | "url"
+- `onUpload`: async function for custom upload
+- `maxFileSize`: bytes (default 5MB)
+- `acceptedTypes`: array of MIME types
+
+### EditorTableExtensions (editor-table.tsx)
+
+Full table support with resizable columns.
+
+**Commands:** `insertTable`, `addColumnBefore`, `addColumnAfter`, `deleteColumn`, `addRowBefore`, `addRowAfter`, `deleteRow`, `deleteTable`, `mergeCells`, `splitCell`, `toggleHeaderRow`, `toggleHeaderColumn`, `toggleHeaderCell`
+
+### EditorCodeBlockExtension (editor-code-block.tsx)
+
+Syntax highlighting for 30+ languages.
+
+**Commands:** `codeBlock`
+
+### EditorSlashMenuExtension (editor-slash-menu.tsx)
+
+Notion-style `/` command menu with customizable items.
+
+### EditorPlaceholderExtension (editor-placeholder.tsx)
+
+Shows placeholder text in empty blocks.
+
+**Factory function:**
+```tsx
+createEditorPlaceholderExtension({
+  placeholder: "Write something..." // or function
+})
+```
+
+### EditorTaskListExtensions (editor-task-list.tsx)
+
+Checkbox task lists.
+
+**Commands:** `taskList`
+
+### EditorHighlightExtension (editor-highlight.tsx)
+
+Text highlighting.
+
+**Commands:** `highlight`
+
+---
+
+## Hooks
+
+```tsx
+import { useEditor, useEditorIsActive, useEditorCurrentActions } from "@/registry/editor/editor"
+
+function MyComponent() {
+  const { editor, registry } = useEditor()
+  const isBold = useEditorIsActive("bold")
+  const activeActions = useEditorCurrentActions()
+}
+```
+
+---
+
+## Full Example
+
+```tsx
+import {
+  EditorProvider,
+  EditorContent,
+  EditorToolbar,
+  EditorButton,
+  EditorButtonGroup,
+  EditorSeparator,
+  EditorDropdown,
+  EditorLabel,
+  EditorBubbleMenu,
+  EditorBubbleMenuContent,
+  EditorBubbleMenuButton,
+  EditorBubbleMenuGroup,
+} from "@/registry/editor/editor"
+
+import { EditorEssentialExtension } from "@/registry/editor/editor-essential"
+import { EditorLinkExtensions } from "@/registry/editor/editor-link"
+import { EditorImageExtension } from "@/registry/editor/editor-image"
+import { EditorTableExtensions } from "@/registry/editor/editor-table"
+import { EditorCodeBlockExtension } from "@/registry/editor/editor-code-block"
+import { EditorSlashMenuExtension } from "@/registry/editor/editor-slash-menu"
+import { EditorPlaceholderExtension } from "@/registry/editor/editor-placeholder"
+import { EditorTaskListExtensions } from "@/registry/editor/editor-task-list"
+import { EditorHighlightExtension } from "@/registry/editor/editor-highlight"
+
+function FullEditor({ content, onUpdate }) {
+  return (
+    <EditorProvider
+      content={content}
+      extensions={[
+        EditorEssentialExtension,
+        EditorLinkExtensions,
+        EditorImageExtension.configure({ uploadStrategy: "base64" }),
+        EditorTableExtensions,
+        EditorCodeBlockExtension,
+        EditorSlashMenuExtension,
+        EditorPlaceholderExtension,
+        EditorTaskListExtensions,
+        EditorHighlightExtension,
+      ]}
+      onUpdate={({ editor }) => onUpdate?.(editor.getHTML())}
+    >
+      {/* Toolbar */}
+      <EditorToolbar className="flex flex-wrap gap-1 p-2">
+        <EditorButtonGroup>
+          <EditorButton action="undo">↶</EditorButton>
+          <EditorButton action="redo">↷</EditorButton>
+        </EditorButtonGroup>
+        
+        <EditorSeparator />
+        
+        <EditorDropdown actions={["paragraph", "heading1", "heading2", "heading3"]}>
+          <EditorLabel pattern=":icon :label" />
+        </EditorDropdown>
+        
+        <EditorSeparator />
+        
+        <EditorButtonGroup>
+          <EditorButton action="bold">B</EditorButton>
+          <EditorButton action="italic">I</EditorButton>
+          <EditorButton action="underline">U</EditorButton>
+        </EditorButtonGroup>
+      </EditorToolbar>
+
+      {/* Content */}
+      <EditorContent className="prose dark:prose-invert min-h-[400px] p-4" />
+
+      {/* Bubble Menu on Text Selection */}
+      <EditorBubbleMenu
+        shouldShow={({ editor, from, to }) => {
+          if (from === to) return false
+          if (editor.isActive("codeBlock")) return false
+          return true
+        }}
+      >
+        <EditorBubbleMenuContent>
+          <EditorBubbleMenuGroup>
+            <EditorBubbleMenuButton action="bold">B</EditorBubbleMenuButton>
+            <EditorBubbleMenuButton action="italic">I</EditorBubbleMenuButton>
+          </EditorBubbleMenuGroup>
+        </EditorBubbleMenuContent>
+      </EditorBubbleMenu>
+    </EditorProvider>
+  )
+}
+```
+
+---
+
+## Tips for AI Assistants
+
+1. **Always wrap editor in `EditorProvider`** - All hooks and components require this context.
+
+2. **Use action strings for EditorButton** - The `action` prop auto-binds to the registry. Available actions depend on loaded extensions.
+
+3. **Extensions register their own commands** - No need to manually configure the registry; just include the extension.
+
+4. **EditorBubbleMenu needs `shouldShow`** - Control when to show with a function returning boolean.
+
+5. **Input binding syntax** - Use `binding="mark.attr"` format:
+   - `binding="link.href"` → gets href from link mark
+   - `binding={(editor) => editor.getAttributes("link").href}` → custom function
+
+6. **EditorContent needs prose classes** - Use `className="prose dark:prose-invert"` for proper typography.
+
+7. **Extension order matters** - Put `EditorEssentialExtension` first, then other extensions.
+
+8. **Configurable extensions** - Use `.configure()` before passing to `extensions` array.
