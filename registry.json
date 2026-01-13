@@ -44,6 +44,10 @@
           "type": "registry:ui"
         },
         {
+          "path": "src/registry/editor/editor.d.ts",
+          "type": "registry:ui"
+        },
+        {
           "path": "src/registry/editor/editor-code-block.tsx",
           "type": "registry:ui"
         },

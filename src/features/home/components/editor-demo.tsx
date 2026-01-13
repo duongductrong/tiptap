@@ -131,6 +131,8 @@ export default function EditorDemo() {
               "heading2",
               "heading3",
               "blockquote",
+              "codeBlock",
+              "divider",
             ]}
           >
             <EditorLabel pattern=":label" />

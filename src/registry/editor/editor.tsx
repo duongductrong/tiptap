@@ -25,6 +25,7 @@ import {
 import { Check, ChevronDown, Link2Off } from "lucide-react"
 import { EditorBubbleMenuLink } from "./editor-link"
 import { EDITOR_PLACEHOLDER_CLASSES } from "./editor-placeholder"
+import type { EditorActionKey } from "./editor.d"
 
 type NestedArray<T> = T | NestedArray<T>[]
 
@@ -499,7 +500,7 @@ const EditorToolbarGroup = EditorButtonGroup
 // =============================================================================
 
 export interface EditorButtonProps extends React.ComponentProps<typeof Button> {
-  action: string
+  action: EditorActionKey
   activeVariant?: "default" | "secondary" | "outline"
 }
 
@@ -599,7 +600,7 @@ const EditorDropdownContext =
 export interface EditorDropdownProps extends React.ComponentProps<
   typeof DropdownMenu
 > {
-  actions: string[]
+  actions: EditorActionKey[]
 }
 
 const EditorDropdown = React.forwardRef<HTMLButtonElement, EditorDropdownProps>(
