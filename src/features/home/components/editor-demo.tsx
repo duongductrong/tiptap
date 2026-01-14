@@ -1,6 +1,7 @@
 "use client"
 
 import type { Editor } from "@tiptap/react"
+import { motion } from "motion/react"
 
 import {
   EditorBubbleMenu,
@@ -80,7 +81,26 @@ const INITIAL_CONTENT = `
 
 export default function EditorDemo() {
   return (
-    <div className="mx-auto mb-32 max-w-6xl rounded-md border">
+    <motion.div
+      initial={{
+        opacity: 0,
+        y: 20,
+        filter: "blur(10px)",
+      }}
+      whileInView={{
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+      }}
+      transition={{
+        type: "spring",
+        delay: 0.6,
+        duration: 1,
+        bounce: 0,
+      }}
+      viewport={{ once: true }}
+      className="mx-auto mb-32 max-w-6xl rounded-md border"
+    >
       <EditorProvider
         content={INITIAL_CONTENT}
         extensions={[
@@ -257,6 +277,6 @@ export default function EditorDemo() {
           </EditorBubbleMenuContent>
         </EditorBubbleMenu>
       </EditorProvider>
-    </div>
+    </motion.div>
   )
 }
