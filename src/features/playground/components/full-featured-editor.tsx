@@ -47,6 +47,17 @@ import { EditorCodeBlockExtension } from "@/registry/editor/editor-code-block"
 
 import { EditorSlashMenuExtension } from "@/registry/editor/editor-slash-menu"
 
+import {
+  EditorColorExtension,
+  EditorColorPicker,
+  EditorColorPickerContent,
+  EditorColorPickerCustom,
+  EditorColorPickerGrid,
+  EditorColorPickerIndicator,
+  EditorColorPickerItem,
+  EditorColorPickerLabel,
+  EditorColorPickerTrigger,
+} from "@/registry/editor/editor-color"
 import { EditorEssentialExtension } from "@/registry/editor/editor-essential"
 import { EditorHighlightExtension } from "@/registry/editor/editor-highlight"
 import { EditorLinkExtensions } from "@/registry/editor/editor-link"
@@ -66,9 +77,40 @@ import {
   Redo,
   Strikethrough,
   Table,
+  Type,
   Underline,
   Undo,
 } from "lucide-react"
+
+// =============================================================================
+// Color Palettes (defined at usage place for customization flexibility)
+// =============================================================================
+
+const TEXT_COLORS = [
+  { name: "default", value: "inherit", label: "Default" },
+  { name: "gray", value: "#9b9a97", label: "Gray" },
+  { name: "brown", value: "#64473a", label: "Brown" },
+  { name: "orange", value: "#d9730d", label: "Orange" },
+  { name: "yellow", value: "#cb8700", label: "Yellow" },
+  { name: "green", value: "#448361", label: "Green" },
+  { name: "blue", value: "#337ea9", label: "Blue" },
+  { name: "purple", value: "#9065b0", label: "Purple" },
+  { name: "pink", value: "#c14c8a", label: "Pink" },
+  { name: "red", value: "#d44c47", label: "Red" },
+] as const
+
+const HIGHLIGHT_COLORS = [
+  { name: "default", value: "transparent", label: "No background" },
+  { name: "gray", value: "#e3e2e0", label: "Gray" },
+  { name: "brown", value: "#eee0da", label: "Brown" },
+  { name: "orange", value: "#fadec9", label: "Orange" },
+  { name: "yellow", value: "#fdecc8", label: "Yellow" },
+  { name: "green", value: "#dbeddb", label: "Green" },
+  { name: "blue", value: "#d3e5ef", label: "Blue" },
+  { name: "purple", value: "#e8deee", label: "Purple" },
+  { name: "pink", value: "#f5e0e9", label: "Pink" },
+  { name: "red", value: "#ffe2dd", label: "Red" },
+] as const
 
 // Bubble menu should show for text selection, excluding tables/code blocks/images
 const shouldShowTextBubbleMenu = ({
@@ -117,14 +159,22 @@ export function FullFeaturedEditor({
     <EditorProvider
       content={content}
       extensions={[
+        // Essential extension
         EditorEssentialExtension,
 
+        // Link extension
         EditorLinkExtensions,
 
+        // Task list extension
         EditorTaskListExtensions,
 
+        // Placeholder extension
         EditorPlaceholderExtension,
 
+        // Color extension (includes text color and highlight)
+        EditorColorExtension,
+
+        // Highlight extension
         EditorHighlightExtension,
 
         // Image with base64 upload (for demo, use server upload in production)
@@ -268,9 +318,41 @@ export function FullFeaturedEditor({
 
           <EditorBubbleMenuSeparator />
 
-          <EditorBubbleMenuButton action="highlight" title="Highlight">
-            <Highlighter className="size-3.5" />
-          </EditorBubbleMenuButton>
+          <EditorColorPicker>
+            <EditorColorPickerTrigger>
+              <EditorBubbleMenuButton title="Text color" className="relative">
+                <Type className="z-10 size-3.5" />
+                <EditorColorPickerIndicator />
+              </EditorBubbleMenuButton>
+            </EditorColorPickerTrigger>
+            <EditorColorPickerContent align="start">
+              <EditorColorPickerLabel>Text Color</EditorColorPickerLabel>
+              <EditorColorPickerGrid>
+                {TEXT_COLORS.map((c) => (
+                  <EditorColorPickerItem
+                    key={c.name}
+                    color={c.value}
+                    variant="text"
+                    title={c.label}
+                  />
+                ))}
+                <EditorColorPickerCustom variant="text" />
+              </EditorColorPickerGrid>
+
+              <EditorColorPickerLabel>Highlight</EditorColorPickerLabel>
+              <EditorColorPickerGrid>
+                {HIGHLIGHT_COLORS.map((c) => (
+                  <EditorColorPickerItem
+                    key={c.name}
+                    color={c.value}
+                    variant="highlight"
+                    title={c.label}
+                  />
+                ))}
+                <EditorColorPickerCustom variant="highlight" />
+              </EditorColorPickerGrid>
+            </EditorColorPickerContent>
+          </EditorColorPicker>
 
           <EditorBubbleMenuSeparator />
 

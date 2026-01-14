@@ -119,6 +119,9 @@ importers:
       '@tiptap/extension-code-block-lowlight':
         specifier: ^2.11.5
         version: 2.27.1(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))(@tiptap/extension-code-block@2.27.1(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))(@tiptap/pm@2.27.1))(@tiptap/pm@2.27.1)(highlight.js@11.11.1)(lowlight@3.3.0)
+      '@tiptap/extension-color':
+        specifier: ^3.15.3
+        version: 3.15.3(@tiptap/extension-text-style@3.15.3(@tiptap/core@2.27.1(@tiptap/pm@2.27.1)))
       '@tiptap/extension-highlight':
         specifier: ^2.27.1
         version: 2.27.1(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))
@@ -149,6 +152,9 @@ importers:
       '@tiptap/extension-text-align':
         specifier: ^2.11.5
         version: 2.27.1(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))
+      '@tiptap/extension-text-style':
+        specifier: ^3.15.3
+        version: 3.15.3(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))
       '@tiptap/extension-typography':
         specifier: ^2.11.5
         version: 2.27.1(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))
@@ -239,6 +245,9 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.2.3
+      react-colorful:
+        specifier: ^5.6.1
+        version: 5.6.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react-day-picker:
         specifier: 9.13.0
         version: 9.13.0(react@19.2.3)
@@ -2194,6 +2203,11 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.7.0
 
+  '@tiptap/extension-color@3.15.3':
+    resolution: {integrity: sha512-GS+LEJ7YC7J6CiQ/caTDVyKg+ZlU4B5ofzAZ0iCWPahjMyUUZImzXvoRlfMumAiPG+IUW9PC2BztSGd3SCLpGA==}
+    peerDependencies:
+      '@tiptap/extension-text-style': ^3.15.3
+
   '@tiptap/extension-document@2.27.1':
     resolution: {integrity: sha512-NtJzJY7Q/6XWjpOm5OXKrnEaofrcc1XOTYlo/SaTwl8k2bZo918Vl0IDBWhPVDsUN7kx767uHwbtuQZ+9I82hA==}
     peerDependencies:
@@ -2321,6 +2335,11 @@ packages:
     resolution: {integrity: sha512-NagQ9qLk0Ril83gfrk+C65SvTqPjL3WVnLF2arsEVnCrxcx3uDOvdJW67f/K5HEwEHsoqJ4Zq9Irco/koXrOXA==}
     peerDependencies:
       '@tiptap/core': ^2.7.0
+
+  '@tiptap/extension-text-style@3.15.3':
+    resolution: {integrity: sha512-/M7fuGRPVkeM14rQ1bNiLZUs2N+FuVhIsLEwNKKk7GaTGKHzmkC1b2COmbICivuFYf90KWzaG0R+Pm7cnW6KaA==}
+    peerDependencies:
+      '@tiptap/core': ^3.15.3
 
   '@tiptap/extension-text@2.27.1':
     resolution: {integrity: sha512-a4GCT+GZ9tUwl82F4CEum9/+WsuW0/De9Be/NqrMmi7eNfAwbUTbLCTFU0gEvv25WMHCoUzaeNk/qGmzeVPJ1Q==}
@@ -4767,6 +4786,12 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
+  react-colorful@5.6.1:
+    resolution: {integrity: sha512-1exovf0uGTGyq5mXQT0zgQ80uvj2PCwvF8zY1RN9/vbJVSjSo3fsB/4L3ObbF7u70NduSiK4xu4Y6q1MHoUGEw==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
   react-day-picker@9.13.0:
     resolution: {integrity: sha512-euzj5Hlq+lOHqI53NiuNhCP8HWgsPf/bBAVijR50hNaY1XwjKjShAnIe8jm8RD2W9IJUvihDIZ+KrmqfFzNhFQ==}
     engines: {node: '>=18'}
@@ -7166,6 +7191,10 @@ snapshots:
     dependencies:
       '@tiptap/core': 2.27.1(@tiptap/pm@2.27.1)
 
+  '@tiptap/extension-color@3.15.3(@tiptap/extension-text-style@3.15.3(@tiptap/core@2.27.1(@tiptap/pm@2.27.1)))':
+    dependencies:
+      '@tiptap/extension-text-style': 3.15.3(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))
+
   '@tiptap/extension-document@2.27.1(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))':
     dependencies:
       '@tiptap/core': 2.27.1(@tiptap/pm@2.27.1)
@@ -7269,6 +7298,10 @@ snapshots:
       '@tiptap/core': 2.27.1(@tiptap/pm@2.27.1)
 
   '@tiptap/extension-text-style@2.27.1(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))':
+    dependencies:
+      '@tiptap/core': 2.27.1(@tiptap/pm@2.27.1)
+
+  '@tiptap/extension-text-style@3.15.3(@tiptap/core@2.27.1(@tiptap/pm@2.27.1))':
     dependencies:
       '@tiptap/core': 2.27.1(@tiptap/pm@2.27.1)
 
@@ -9770,6 +9803,11 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.1
       unpipe: 1.0.0
+
+  react-colorful@5.6.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   react-day-picker@9.13.0(react@19.2.3):
     dependencies:

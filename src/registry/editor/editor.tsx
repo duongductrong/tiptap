@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import * as React from "react"
 
 import {
@@ -22,7 +23,7 @@ import {
   useEditor as useTiptapEditor,
   type UseEditorOptions,
 } from "@tiptap/react"
-import { Check, ChevronDown, Link2Off } from "lucide-react"
+import { Check, ChevronDown, ChevronRight, Link2Off } from "lucide-react"
 import { EditorBubbleMenuLink } from "./editor-link"
 import { EDITOR_PLACEHOLDER_CLASSES } from "./editor-placeholder"
 import type { EditorActionKey } from "./editor.d"
@@ -1415,6 +1416,244 @@ const EditorBubbleMenuFormCancel = React.forwardRef<
   )
 })
 EditorBubbleMenuFormCancel.displayName = "EditorBubbleMenuFormCancel"
+
+// =============================================================================
+// EditorBubbleMenuDropdown (Radix-based Dropdown System)
+// =============================================================================
+
+const EditorBubbleMenuDropdownRoot = DropdownMenuPrimitive.Root
+
+export interface EditorBubbleMenuDropdownProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.Root
+> {}
+
+function EditorBubbleMenuDropdown({
+  children,
+  ...props
+}: EditorBubbleMenuDropdownProps) {
+  return (
+    <EditorBubbleMenuDropdownRoot {...props}>
+      {children}
+    </EditorBubbleMenuDropdownRoot>
+  )
+}
+EditorBubbleMenuDropdown.displayName = "EditorBubbleMenuDropdown"
+
+// =============================================================================
+// EditorBubbleMenuDropdownTrigger
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownTriggerProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.Trigger
+> {}
+
+const EditorBubbleMenuDropdownTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
+  EditorBubbleMenuDropdownTriggerProps
+>(({ className, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.Trigger
+    ref={ref}
+    asChild
+    className={cn("outline-none", className)}
+    {...props}
+  >
+    {children}
+  </DropdownMenuPrimitive.Trigger>
+))
+EditorBubbleMenuDropdownTrigger.displayName = "EditorBubbleMenuDropdownTrigger"
+
+// =============================================================================
+// EditorBubbleMenuDropdownContent
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownContentProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.Content
+> {
+  portal?: boolean
+}
+
+const EditorBubbleMenuDropdownContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  EditorBubbleMenuDropdownContentProps
+>(({ className, portal = false, sideOffset = 4, ...props }, ref) => {
+  const Portal = portal ? DropdownMenuPrimitive.Portal : React.Fragment
+  return (
+    <Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        className={cn(
+          "bg-popover text-popover-foreground z-50 min-w-[8rem] overflow-hidden rounded-lg border p-1.5 shadow-md",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          className
+        )}
+        {...props}
+      />
+    </Portal>
+  )
+})
+EditorBubbleMenuDropdownContent.displayName = "EditorBubbleMenuDropdownContent"
+
+// =============================================================================
+// EditorBubbleMenuDropdownItem
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownItemProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.Item
+> {
+  inset?: boolean
+}
+
+const EditorBubbleMenuDropdownItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  EditorBubbleMenuDropdownItemProps
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors outline-none select-none",
+      "focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "[&>svg]:size-4 [&>svg]:shrink-0",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+EditorBubbleMenuDropdownItem.displayName = "EditorBubbleMenuDropdownItem"
+
+// =============================================================================
+// EditorBubbleMenuDropdownSub
+// =============================================================================
+
+const EditorBubbleMenuDropdownSub = DropdownMenuPrimitive.Sub
+
+// =============================================================================
+// EditorBubbleMenuDropdownSubTrigger
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownSubTriggerProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.SubTrigger
+> {
+  inset?: boolean
+}
+
+const EditorBubbleMenuDropdownSubTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
+  EditorBubbleMenuDropdownSubTriggerProps
+>(({ className, inset, children, ...props }, ref) => (
+  <DropdownMenuPrimitive.SubTrigger
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none",
+      "focus:bg-accent data-[state=open]:bg-accent",
+      "[&>svg]:size-4 [&>svg]:shrink-0",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronRight className="ml-auto size-4" />
+  </DropdownMenuPrimitive.SubTrigger>
+))
+EditorBubbleMenuDropdownSubTrigger.displayName =
+  "EditorBubbleMenuDropdownSubTrigger"
+
+// =============================================================================
+// EditorBubbleMenuDropdownSubContent
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownSubContentProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.SubContent
+> {}
+
+const EditorBubbleMenuDropdownSubContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
+  EditorBubbleMenuDropdownSubContentProps
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.SubContent
+      ref={ref}
+      className={cn(
+        "bg-popover text-popover-foreground z-50 min-w-[8rem] overflow-hidden rounded-lg border p-1.5 shadow-lg",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        className
+      )}
+      {...props}
+    />
+  </DropdownMenuPrimitive.Portal>
+))
+EditorBubbleMenuDropdownSubContent.displayName =
+  "EditorBubbleMenuDropdownSubContent"
+
+// =============================================================================
+// EditorBubbleMenuDropdownSeparator
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownSeparatorProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.Separator
+> {}
+
+const EditorBubbleMenuDropdownSeparator = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
+  EditorBubbleMenuDropdownSeparatorProps
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Separator
+    ref={ref}
+    className={cn("bg-muted -mx-1 my-1.5 h-px", className)}
+    {...props}
+  />
+))
+EditorBubbleMenuDropdownSeparator.displayName =
+  "EditorBubbleMenuDropdownSeparator"
+
+// =============================================================================
+// EditorBubbleMenuDropdownLabel
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownLabelProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.Label
+> {
+  inset?: boolean
+}
+
+const EditorBubbleMenuDropdownLabel = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Label>,
+  EditorBubbleMenuDropdownLabelProps
+>(({ className, inset, ...props }, ref) => (
+  <DropdownMenuPrimitive.Label
+    ref={ref}
+    className={cn(
+      "text-muted-foreground px-2 py-1.5 text-xs font-medium",
+      inset && "pl-8",
+      className
+    )}
+    {...props}
+  />
+))
+EditorBubbleMenuDropdownLabel.displayName = "EditorBubbleMenuDropdownLabel"
+
+// =============================================================================
+// EditorBubbleMenuDropdownGroup
+// =============================================================================
+
+export interface EditorBubbleMenuDropdownGroupProps extends React.ComponentProps<
+  typeof DropdownMenuPrimitive.Group
+> {}
+
+const EditorBubbleMenuDropdownGroup = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Group>,
+  EditorBubbleMenuDropdownGroupProps
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Group
+    ref={ref}
+    className={cn("", className)}
+    {...props}
+  />
+))
+EditorBubbleMenuDropdownGroup.displayName = "EditorBubbleMenuDropdownGroup"
+
 // =============================================================================
 // Hooks
 // =============================================================================
@@ -1463,6 +1702,16 @@ export {
   EditorBubbleMenu,
   EditorBubbleMenuButton,
   EditorBubbleMenuContent,
+  EditorBubbleMenuDropdown,
+  EditorBubbleMenuDropdownContent,
+  EditorBubbleMenuDropdownGroup,
+  EditorBubbleMenuDropdownItem,
+  EditorBubbleMenuDropdownLabel,
+  EditorBubbleMenuDropdownSeparator,
+  EditorBubbleMenuDropdownSub,
+  EditorBubbleMenuDropdownSubContent,
+  EditorBubbleMenuDropdownSubTrigger,
+  EditorBubbleMenuDropdownTrigger,
   EditorBubbleMenuForm,
   EditorBubbleMenuFormActions,
   EditorBubbleMenuFormCancel,
